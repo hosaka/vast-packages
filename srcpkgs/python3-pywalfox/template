@@ -1,0 +1,19 @@
+# Template file for 'python3-pywalfox'
+pkgname=python3-pywalfox
+version=2.7.4
+revision=1
+build_style=python3-pep517
+makedepends="python3-setuptools"
+depends="python3"
+short_desc="Native app used alongside the Pywalfox browser extension"
+maintainer="Orphaned <orphan@voidlinux.org>"
+license="MPL-2.0"
+homepage="https://github.com/Frewacom/pywalfox-native"
+changelog="https://github.com/Frewacom/pywalfox-native/releases/tag/v${version}"
+distfiles="${homepage}/archive/v${version}.tar.gz"
+checksum=c6602edd68e1cd71ad8e8ce3e497e32f6ba4468b6d32df328e3c14d380004722
+
+# todo: patch the pywalfox/bin/main.sh to not use sw_vers and just run pywalfox start?
+post_install() {
+    vlicense LICENSE
+}
