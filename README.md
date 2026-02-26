@@ -9,6 +9,7 @@ This repository contains my personal XBPS source packages collection to build bi
 ## Wishlist
 
 - [bob](https://github.com/MordechaiHadad/bob)
+- [feishin](https://github.com/jeffvli/feishin): upstream will treat this with "electron 🤮"
 - [font-monaspace](https://github.com/githubnext/monaspace)
 - [hadolint](https://github.com/hadolint/hadolint)
 - [just-lsp](https://github.com/terror/just-lsp)
