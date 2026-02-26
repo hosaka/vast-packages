@@ -4,12 +4,12 @@ This repository contains my personal XBPS source packages collection to build bi
 
 ## Upstream
 
+- `bob`: [PR](https://github.com/void-linux/void-packages/pull/59155)
 - `openpgp-card-tools-git`: [PR](https://github.com/void-linux/void-packages/pull/58914)
 - `prek`: [PR](https://github.com/void-linux/void-packages/pull/59152)
 
 ## Wishlist
 
-- [bob](https://github.com/MordechaiHadad/bob)
 - [feishin](https://github.com/jeffvli/feishin): upstream will treat this with "electron 🤮"
 - [font-monaspace](https://github.com/githubnext/monaspace)
 - [hadolint](https://github.com/hadolint/hadolint)
