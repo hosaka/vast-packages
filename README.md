@@ -8,6 +8,11 @@ This repository contains my personal XBPS source packages collection to build bi
 
 ## Wishlist
 
+- [bob](https://github.com/MordechaiHadad/bob)
 - [font-monaspace](https://github.com/githubnext/monaspace)
+- [hadolint](https://github.com/hadolint/hadolint)
+- [just-lsp](https://github.com/terror/just-lsp)
 - [limine-entry-tool](https://gitlab.com/Zesko/limine-entry-tool): requires GraalVM 25 but void packages [Mandrel 23](https://github.com/void-linux/void-packages/tree/master/srcpkgs/mandrel)
 - [limine-snapper-sync](https://gitlab.com/Zesko/limine-snapper-sync): same issue as above
+- [marksman](https://github.com/artempyanykh/marksman): could try using Mono or wait for dotnet to be packaged upstream
+- [prek](https://github.com/j178/prek)
