@@ -1,0 +1,35 @@
+# Template file for 'limine-snapper-sync'
+pkgname=limine-snapper-sync
+version=1.25.0
+revision=1
+hostmakedepends="mandrel gradle zlib-devel"
+makedepends=""
+depends="limine snapper btrfs-progs libnotify"
+short_desc="Automatically sync Limine snapshot entries with Snapper snapshots"
+maintainer="Alex March <alex@hosaka.cc>"
+license="GPL-3.0-or-later"
+homepage="https://gitlab.com/Zesko/limine-snapper-sync"
+changelog="https://gitlab.com/Zesko/limine-snapper-sync/-/raw/master/CHANGELOG.md"
+distfiles="https://gitlab.com/Zesko/limine-snapper-sync/-/archive/${version}/${pkgname}-${version}.tar.gz"
+checksum=d9351a964b37d57a6c3426da7f440a58b5cd76642342b813e5ed1a3f6ca5a1ad
+nocross="mandrel"
+
+do_build() {
+  export JAVA_HOME=/usr/lib/jvm/mandrel21
+  export GRAALVM_HOME=/usr/lib/jvm/mandrel21
+  export PATH="${PATH}:${GRAALVM_HOME}/bin"
+
+  # build.patch is applied to remove some build flags that are only
+  # available in GraalVM 25 and Mandrel 23 doesn't have them
+
+  if [ "$XBPS_TARGET_LIBC" = musl ]; then
+    LIMINE_SNAPPER_SYNC_MUSL=true
+  fi
+
+  gradle clean nativeCompile --no-daemon
+}
+
+do_install() {
+  # vbin limine-snapper-sync
+  vlicense LICENSE
+}

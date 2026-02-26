@@ -1,0 +1,36 @@
+From 6fae58ed3de0e8aaa84a4404fc59122f19e26d01 Mon Sep 17 00:00:00 2001
+From: Alex March <alexmarch@fastmail.com>
+Date: Thu, 9 Apr 2026 15:44:14 +0900
+Subject: [PATCH 2/2] incompatible build args
+
+---
+ build.gradle.kts | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 6c5e7ad..743f2fa 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -26,11 +26,10 @@ graalvmNative {
+             fallback.set(false)
+             verbose.set(false)
+ 
+-            buildArgs.add("--future-defaults=all") // Future compatibility
+             buildArgs.add("--gc=serial")
+             buildArgs.add("-march=compatibility")
+             buildArgs.add("-R:MaxHeapSize=128m")
+-            buildArgs.add("-Os") //Reduce binary size
++            buildArgs.add("-O2")
+ 
+             buildArgs.add("-H:+UnlockExperimentalVMOptions")
+             buildArgs.add("-H:ReflectionConfigurationFiles=${file("src/main/resources/reflect-config.json").absolutePath}")
+@@ -42,4 +41,4 @@ graalvmNative {
+     tasks.test {
+         enabled = false
+     }
+-}
+\ No newline at end of file
++}
+-- 
+2.53.0
+
