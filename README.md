@@ -8,6 +8,7 @@ This repository contains my personal XBPS source packages collection to build bi
 - `just-lsp`: [PR](https://github.com/void-linux/void-packages/pull/59161)
 - `openpgp-card-tools-git`: [PR](https://github.com/void-linux/void-packages/pull/58914)
 - `prek`: [PR](https://github.com/void-linux/void-packages/pull/59152)
+- `yaml-language-server`: [PR](https://github.com/void-linux/void-packages/pull/59196)
 
 ## Wishlist
 
@@ -17,4 +18,3 @@ This repository contains my personal XBPS source packages collection to build bi
 - [limine-entry-tool](https://gitlab.com/Zesko/limine-entry-tool): requires GraalVM 25 but void packages [Mandrel 23](https://github.com/void-linux/void-packages/tree/master/srcpkgs/mandrel)
 - [limine-snapper-sync](https://gitlab.com/Zesko/limine-snapper-sync): same issue as above
 - [marksman](https://github.com/artempyanykh/marksman): could try using Mono or wait for dotnet to be packaged upstream
-- [yaml-language-server](https://https://github.com/redhat-developer/yaml-language-server): should be a similar template to [bash-language-server](https://github.com/void-linux/void-packages/blob/master/srcpkgs/bash-language-server/template)
