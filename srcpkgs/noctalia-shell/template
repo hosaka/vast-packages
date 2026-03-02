@@ -1,0 +1,19 @@
+# Template file for 'noctalia-shell'
+pkgname=noctalia-shell
+version=4.6.0
+revision=1
+hostmakedepends="git"
+depends="noctalia-qs brightnessctl ImageMagick qt6-multimedia python3 git"
+short_desc="Sleek and minimal desktop shell thoughtfully crafted for Wayland"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://github.com/noctalia-dev/noctalia-shell"
+distfiles="$homepage/archive/v${version}.tar.gz"
+checksum=18ecc5e1a49b35fe2557eb1178377db2b88c3d575f19b418f60da627fd13b618
+
+do_install() {
+ vmkdir etc/xdg/quickshell/noctalia-shell
+ vcopy . etc/xdg/quickshell/noctalia-shell/
+
+ vlicense LICENSE
+}
