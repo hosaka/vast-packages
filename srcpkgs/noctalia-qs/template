@@ -1,6 +1,6 @@
 # Template file for 'noctalia-qs'
 pkgname=noctalia-qs
-version=0.0.4
+version=0.0.5
 revision=1
 build_style=cmake
 configure_args="-DDISTRIBUTOR=Void -DDISTRIBUTOR_DEBUGINFO_AVAILABLE=YES
@@ -14,6 +14,11 @@ short_desc="Custom fork of Quickshell powering Noctalia Shell"
 maintainer="Alex March <alex@hosaka.cc>"
 license="LGPL-3.0-only"
 homepage="https://github.com/noctalia-dev/noctalia-qs"
-distfiles="$homepage/archive/v${version}.tar.gz"
-checksum=4aee2264b4165dfd99278a545d51d4637da4aca6db3e57443d9320685cb0f749
+distfiles="https://github.com/noctalia-dev/noctalia-qs/archive/v${version}.tar.gz"
+checksum=b0552dcffa6ddfbf81fa890508fca50b2cfa46a2c95f7a6945b94cdb45052026
 conflicts="quickshell"
+
+pre_configure() {
+	local GIT_REVISION="$(curl -s "https://api.github.com/repos/noctalia-dev/noctalia-qs/git/refs/tags/v${version}" | grep '"sha"' | head -1 | cut -d'"' -f4)"
+	configure_args+=" -DGIT_REVISION=$GIT_REVISION"
+}
