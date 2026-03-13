@@ -4,7 +4,7 @@ This repository contains my personal XBPS source packages collection to build bi
 
 ## Upstream
 
-- `bob`: [PR](https://github.com/void-linux/void-packages/pull/59155)
+- `bob`: [PR](https://github.com/void-linux/void-packages/pull/59155) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/bob/template)
 - `just-lsp`: [PR](https://github.com/void-linux/void-packages/pull/59161) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/just-lsp/template)
 - `openpgp-card-tools-git`: [PR](https://github.com/void-linux/void-packages/pull/58914) [Maintainer PR](https://github.com/void-linux/void-packages/pull/59297)
 - `prek`: [PR](https://github.com/void-linux/void-packages/pull/59152) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/prek/template)
