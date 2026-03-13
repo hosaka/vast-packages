@@ -8,7 +8,7 @@ This repository contains my personal XBPS source packages collection to build bi
 - `just-lsp`: [PR](https://github.com/void-linux/void-packages/pull/59161) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/just-lsp/template)
 - `openpgp-card-tools-git`: [PR](https://github.com/void-linux/void-packages/pull/58914) [Maintainer PR](https://github.com/void-linux/void-packages/pull/59297)
 - `prek`: [PR](https://github.com/void-linux/void-packages/pull/59152) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/prek/template)
-- `yaml-language-server`: [PR](https://github.com/void-linux/void-packages/pull/59196)
+- `yaml-language-server`: [PR](https://github.com/void-linux/void-packages/pull/59196) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/yaml-language-server/template)
 
 ## Wishlist
 
