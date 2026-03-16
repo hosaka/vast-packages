@@ -1,12 +1,12 @@
 # Template file for 'noctalia-qs'
 pkgname=noctalia-qs
-version=0.0.7
+version=0.0.8
 revision=1
 build_style=cmake
 configure_args="-DCMAKE_BUILD_TYPE=Release -DINSTALL_QML_PREFIX=lib/qt6/qml
  -DDISTRIBUTOR=Void -DCRASH_REPORTER=OFF"
 hostmakedepends="git pkg-config wayland-devel qt6-base qt6-declarative-devel
- qt6-shadertools SPIRV-Tools Vulkan-Headers"
+ qt6-shadertools SPIRV-Tools Vulkan-Headers curl jq"
 makedepends="cli11 qt6-base-private-devel qt6-declarative-private-devel
  qt6-shadertools-devel pipewire-devel jemalloc-devel pam-devel polkit-devel"
 depends="qt6-svg"
@@ -15,10 +15,10 @@ maintainer="Alex March <alex@hosaka.cc>"
 license="LGPL-3.0-only"
 homepage="https://github.com/noctalia-dev/noctalia-qs"
 distfiles="https://github.com/noctalia-dev/noctalia-qs/archive/v${version}.tar.gz"
-checksum=17da91b89ce62f48f0a7d6734b28d5d400357a580a3fa746450402c39d5a60a4
+checksum=5b5cd150ec5c194828d29cd72ea0004cb070fb93e79ff5edcef9567b145fa3ee
 conflicts="quickshell"
 
 pre_configure() {
-	local GIT_REVISION="$(curl -s "https://api.github.com/repos/noctalia-dev/noctalia-qs/git/refs/tags/v${version}" | grep '"sha"' | head -1 | cut -d'"' -f4)"
-	configure_args+=" -DGIT_REVISION=${GIT_REVISION}"
+	local rev="$(curl -s https://api.github.com/repos/noctalia-dev/noctalia-qs/git/refs/tags/v${version} | jq '.[\"object\"].["\"sha\"]' )"
+	configure_args+=" -DGIT_REVISION=${rev}"
 }
