@@ -1,6 +1,6 @@
 # Template file for 'noctalia-shell'
 pkgname=noctalia-shell
-version=4.7.0
+version=4.7.1
 revision=1
 hostmakedepends="git"
 depends="noctalia-qs brightnessctl ImageMagick qt6-multimedia python3 git"
@@ -10,7 +10,7 @@ license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia-shell"
 changelog="https://github.com/noctalia-dev/noctalia-shell/releases"
 distfiles="https://github.com/noctalia-dev/noctalia-shell/archive/v${version}.tar.gz"
-checksum=eb5fa96feb39fddc9bdda45c734f96fdd28b02fe1a1b0dccfc9295f2c78d7c49
+checksum=1c0944947abd01f76dd575e7d86200a4b4e0e1037d940a1f79c8342405fd60da
 
 do_install() {
  vmkdir etc/xdg/quickshell/noctalia-shell
