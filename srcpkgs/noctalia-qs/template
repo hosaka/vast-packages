@@ -1,6 +1,6 @@
 # Template file for 'noctalia-qs'
 pkgname=noctalia-qs
-version=0.0.10
+version=0.0.12
 revision=1
 build_style=cmake
 configure_args="-DCMAKE_BUILD_TYPE=Release -DINSTALL_QML_PREFIX=lib/qt6/qml
@@ -16,7 +16,7 @@ license="LGPL-3.0-only"
 homepage="https://github.com/noctalia-dev/noctalia-qs"
 changelog="https://github.com/noctalia-dev/noctalia-qs/releases"
 distfiles="https://github.com/noctalia-dev/noctalia-qs/archive/v${version}.tar.gz"
-checksum=129f7ad9ae0f2227bec853872347190a6b03490eec53c45817f22ec947573c8b
+checksum=2a56bd693945957cd112a7eadc38b719cc85f485b8f377565ba25f8708377088
 conflicts="quickshell"
 
 pre_configure() {
