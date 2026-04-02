@@ -1,0 +1,154 @@
+name: Build and publish packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "srcpkgs/**"
+  pull_request:
+    paths:
+      - "srcpkgs/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: docker
+    if: "!contains(forgejo.event.pull_request.title, '[ci skip]') && !contains(forgejo.event.pull_request.body, '[ci skip]')"
+
+    container:
+      image: ghcr.io/void-linux/void-glibc-full:latest
+      options: --privileged --platform linux/amd64
+      env:
+        FORGEJO_URL: https://code.hosaka.cc
+        XBPS_REPO_NAME: vast-packages
+
+    steps:
+      - name: Prepare container
+        run: |
+          # switch to repo-ci mirror
+          mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
+          sed -i 's|repo-default|repo-ci|g' /etc/xbps.d/*-repository-*.conf
+          # install dependencies
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq
+          # create non-root user
+          useradd -G xbuilder -M builder
+
+      - name: Checkout repository
+        run: |
+          git clone --no-checkout --filter=tree:0 "$FORGEJO_URL/$FORGEJO_REPOSITORY.git" .
+          git config --global --add gc.auto 0
+          git config --global --add safe.directory "$PWD"
+          git fetch --prune --filter=tree:0 origin "+refs/heads/*:refs/remotes/origin/*"
+          git checkout "$FORGEJO_SHA"
+
+      - name: Setup void-packages
+        run: |
+          git clone --depth=1 https://github.com/void-linux/void-packages
+          git config --global --add safe.directory "$PWD/void-packages"
+          cp -r srcpkgs/* void-packages/srcpkgs/
+          chown -R builder:builder void-packages
+
+      - name: Find changed packages
+        id: changed
+        run: |
+          if [ "${{ forgejo.event_name }}" = "workflow_dispatch" ]; then
+            # manual trigger builds everything
+            echo "packages=$(ls srcpkgs/ | tr '\n' ' ')" >> $FORGEJO_OUTPUT
+            echo "Building all packages"
+          else
+            # build only packages whose template changed
+            if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
+              base="${{ forgejo.event.pull_request.base.sha }}"
+            else
+              base="${{ forgejo.event.before }}"
+            fi
+            packages=$(git diff-tree -r --no-renames --name-only --diff-filter=AM \
+              "$base" "${{ forgejo.sha }}" -- 'srcpkgs/*/template' \
+              | cut -d/ -f2 \
+              | xargs --no-run-if-empty sudo -Eu builder ./void-packages/xbps-src sort-dependencies \
+              | tr '\n' ' ')
+            echo "packages=$packages" >> $FORGEJO_OUTPUT
+            if [ -z "$packages" ]; then
+              echo "No changed packages"
+            else
+              echo "Changed packages: $packages"
+            fi
+          fi
+
+      - name: Prepare void-packages masterdir
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages
+          echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
+          echo XBPS_CHROOT_CMD=uchroot >> etc/conf
+          echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
+          sudo -Eu builder ./xbps-src binary-bootstrap
+
+      - name: Build packages
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages
+          for pkg in ${{ steps.changed.outputs.packages }}; do
+            echo "Building $pkg"
+            sudo -Eu builder ./xbps-src -E pkg $pkg
+          done
+          ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
+          echo "Built packages:"
+          cat /tmp/latest.list
+
+      - name: Index and sign packages
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages/hostdir/binpkgs
+          echo "${{ secrets.XBPS_PRIVATE_KEY }}" > /tmp/private.pem
+          xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign-pkg *.xbps
+          xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign  .
+          xbps-rindex --add *.xbps
+          rm /tmp/private.pem
+
+      - name: Remove old packages
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages/hostdir/binpkgs
+
+          packages=$(curl --silent --request GET \
+            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+            "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" \
+            | jq --raw-output 'if type == "array" then .[].name else empty end')
+
+          # delete repodata
+          echo -n "Deleting x86_64-repodata "
+          curl --silent --request DELETE --write-out "\n" \
+            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+            "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
+
+          # delete changed packages
+          for pkg in ${{ steps.changed.outputs.packages }}; do
+            pkgname=$(xbps-query --repository . --property pkgname $pkg)
+            for match in $(echo "$packages" | grep "^${pkgname}-"); do
+              echo -n "Deleting $match "
+              curl --silent --request DELETE --write-out "\n" \
+                --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+                "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$match"
+            done
+          done
+
+      - name: Upload packages
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages/hostdir/binpkgs
+
+          for pkg in *{.xbps,.sig2,-repodata}; do
+            echo -n "Uploading $pkg "
+            curl --silent --request PUT --write-out "\n" \
+              --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+              --upload-file "$pkg" \
+              "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$pkg"
+          done
+
+          # todo: link to this repo (says repository does not exists for some reason)
+          echo -n "Linking to this repo "
+          curl --silent --request POST --write-out "\n" \
+            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+            "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/-/link/$XBPS_REPO_NAME"

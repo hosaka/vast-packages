@@ -1,10 +1,10 @@
 # Template file for 'svs'
 pkgname=svs
 version=0.0.1
-revision="1"
-build_style="gnu-makefile"
+revision=4
+build_style=gnu-makefile
 short_desc="Check/view status of runit services"
-maintainer="Galicarnax <galicarnax@gmail.com>"
+maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
 homepage="https://github.com/Galicarnax/svs"
 distfiles="https://github.com/Galicarnax/svs/archive/refs/tags/v${version}.tar.gz"
