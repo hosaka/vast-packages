@@ -82,7 +82,7 @@ jobs:
           cd void-packages
           echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
           echo XBPS_CHROOT_CMD=uchroot >> etc/conf
-          # echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
+          echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
           sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Build packages
@@ -94,9 +94,13 @@ jobs:
             sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg; ret=$?
             [ $ret -eq 1 ] && exit 1
           done
-          ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
-          echo "Built packages:"
-          cat /tmp/latest.list
+          if ls hostdir/binpkgs/*.xbps 2>/dev/null; then
+            ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
+            echo "Built packages:"
+            cat /tmp/latest.list
+          else
+            echo "No packages were built"
+          fi
 
       - name: Index and sign packages
         if: steps.changed.outputs.packages != ''
