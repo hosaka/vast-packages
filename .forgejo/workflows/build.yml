@@ -47,9 +47,6 @@ jobs:
           git clone --depth=1 https://github.com/void-linux/void-packages
           git config --global --add safe.directory "$PWD/void-packages"
           cp -r srcpkgs/* void-packages/srcpkgs/
-          echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> void-packages/etc/conf
-          echo XBPS_CHROOT_CMD=uchroot >> void-packages/etc/conf
-          echo XBPS_ALLOW_RESTRICTED=yes >> void-packages/etc/conf
           chown -R builder:builder void-packages
 
       - name: Find changed packages
@@ -88,9 +85,15 @@ jobs:
           restore-keys: repocache-
 
       - name: Prepare void-packages masterdir
-        if: steps.changed.outputs.packages != '' && steps.cache.outputs.cache-hit != 'true'
+        if: steps.changed.outputs.packages != ''
         run: |
+          # set permissions again in case repocache was restored
+          chown -R builder:builder void-packages
+
           cd void-packages
+          echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
+          echo XBPS_CHROOT_CMD=uchroot >> etc/conf
+          echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
           sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Save hostdir repocache
