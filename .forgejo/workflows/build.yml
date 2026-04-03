@@ -30,7 +30,7 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i 's|repo-default|repo-ci|g' /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -88,11 +88,13 @@ jobs:
       - name: Build packages
         if: steps.changed.outputs.packages != ''
         run: |
+          set +e
           cd void-packages
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
             sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg; ret=$?
             [ $ret -eq 1 ] && exit 1
+            [ $ret -ne 0 ] && echo "$pkg skipped (exit $ret)"
           done
           if ls hostdir/binpkgs/*.xbps 2>/dev/null; then
             ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
