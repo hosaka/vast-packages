@@ -47,6 +47,9 @@ jobs:
           git clone --depth=1 https://github.com/void-linux/void-packages
           git config --global --add safe.directory "$PWD/void-packages"
           cp -r srcpkgs/* void-packages/srcpkgs/
+          echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> void-packages/etc/conf
+          echo XBPS_CHROOT_CMD=uchroot >> void-packages/etc/conf
+          echo XBPS_ALLOW_RESTRICTED=yes >> void-packages/etc/conf
           chown -R builder:builder void-packages
 
       - name: Find changed packages
@@ -76,25 +79,39 @@ jobs:
             fi
           fi
 
+      - name: Restore hostdir repocache
+        id: cache
+        uses: https://data.forgejo.org/actions/cache/restore@v5
+        with:
+          path: void-packages/hostdir/repocache-x86_64
+          key: repocache-${{ forgejo.run_id }}
+          restore-keys: repocache-
+
       - name: Prepare void-packages masterdir
-        if: steps.changed.outputs.packages != ''
+        if: steps.changed.outputs.packages != '' && steps.cache.outputs.cache-hit != 'true'
         run: |
           cd void-packages
-          echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
-          echo XBPS_CHROOT_CMD=uchroot >> etc/conf
-          echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
           sudo -Eu builder ./xbps-src binary-bootstrap
+
+      - name: Save hostdir repocache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: https://data.forgejo.org/actions/cache/save@v5
+        with:
+          path: void-packages/hostdir/repocache-x86_64
+          key: ${{ steps.cache.outputs.cache-primary-key }}
 
       - name: Build packages
         if: steps.changed.outputs.packages != ''
         run: |
+          # handle non-zero exists from xbps-src explicitly
           set +e
+
           cd void-packages
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg; ret=$?
-            [ $ret -eq 1 ] && exit 1
-            [ $ret -ne 0 ] && echo "$pkg skipped (exit $ret)"
+            sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg
+            [ $? -eq 1 ] && exit 1
+            [ $? -ne 0 ] && echo "Skiping $pkg (exit $ret)"
           done
           if ls hostdir/binpkgs/*.xbps 2>/dev/null; then
             ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
@@ -130,9 +147,9 @@ jobs:
             --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
             "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
 
-          # delete changed packages
+          # delete changed packages (skipped packages are ignored)
           for pkg in ${{ steps.changed.outputs.packages }}; do
-            pkgname=$(xbps-query --repository . --property pkgname $pkg)
+            pkgname=$(xbps-query --repository . --property pkgname $pkg) || continue
             for match in $(echo "$packages" | grep "^${pkgname}-"); do
               echo -n "Deleting $match "
               curl --silent --request DELETE --write-out "\n" \
