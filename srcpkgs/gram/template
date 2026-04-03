@@ -15,7 +15,7 @@ license="GPL-3.0-or-later OR Apache-2.0 OR AGPL-3.0-or-later"
 homepage="https://gram.liten.app/"
 distfiles="https://codeberg.org/GramEditor/gram/archive/${version}.tar.gz"
 checksum=27ff4148d5d191cd9ce36c5f8c2284898e0de9ad0cab04e3ad6fe5d1247f9bbb
-restricted=yes
+broken="relies on git submodules"
 
 do_install() {
 	vbin target/${RUST_TARGET}/release/cli gram

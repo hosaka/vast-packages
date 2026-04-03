@@ -91,7 +91,8 @@ jobs:
           cd void-packages
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg
+            sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg; ret=$?
+            [ $ret -eq 1 ] && exit 1
           done
           ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
           echo "Built packages:"
