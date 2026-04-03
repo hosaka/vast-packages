@@ -109,17 +109,10 @@ jobs:
           cd void-packages
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder ./xbps-src -j2 -E -s pkg $pkg
-            [ $? -eq 1 ] && exit 1
-            [ $? -ne 0 ] && echo "Skiping $pkg (exit $ret)"
+            sudo -Eu builder ./xbps-src -j4 -E -s pkg $pkg; ret=$?
+            [ $ret -eq 1 ] && exit 1
+            [ $ret -ne 0 ] && echo "Skiping $pkg (exit $ret)"
           done
-          if ls hostdir/binpkgs/*.xbps 2>/dev/null; then
-            ls hostdir/binpkgs/*.xbps | xargs -n1 basename > /tmp/latest.list
-            echo "Built packages:"
-            cat /tmp/latest.list
-          else
-            echo "No packages were built"
-          fi
 
       - name: Index and sign packages
         if: steps.changed.outputs.packages != ''
