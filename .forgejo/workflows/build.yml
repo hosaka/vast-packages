@@ -145,7 +145,7 @@ jobs:
 
           # download existing repodata that contains all previously registered packages
           if [ "${{ forgejo.event_name }}" != "workflow_dispatch" ]; then
-            $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata
+            $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata || echo "No existing repodata"
           fi
 
           # add newly built packages to the index (updates existing entries if version is greater)
@@ -159,7 +159,6 @@ jobs:
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
           packages=$(scripts/forgejo.sh list)
-          scripts/forgejo.sh delete x86_64-repodata
 
           for pkg in ${{ steps.changed.outputs.packages }}; do
             pkgname=$(xbps-query --repository void-packages/hostdir/binpkgs --property pkgname $pkg) || continue
