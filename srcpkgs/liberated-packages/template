@@ -1,0 +1,12 @@
+# Template file for 'liberated-packages'
+pkgname=liberated-packages
+version=0.1.20260406
+revision=1
+metapackage=yes
+short_desc="Uninstalls packages removed from vast-packages repository"
+maintainer="Alex March <alex@hosaka.cc>"
+license="Public Domain"
+homepage="https://code.hosaka.cc/hosaka/vast-packages"
+
+replaces="
+"

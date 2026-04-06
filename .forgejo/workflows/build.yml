@@ -55,6 +55,7 @@ jobs:
           if [ "${{ forgejo.event_name }}" = "workflow_dispatch" ]; then
             # manual trigger builds everything
             echo "packages=$(ls srcpkgs/ | tr '\n' ' ')" >> $FORGEJO_OUTPUT
+            echo "deleted=" >> $FORGEJO_OUTPUT
             echo "Building all packages"
           else
             # build only packages whose template changed
@@ -73,6 +74,16 @@ jobs:
               echo "No changed packages"
             else
               echo "Changed packages: $packages"
+            fi
+            deleted=$(git diff-tree -r --no-renames --name-only --diff-filter=D \
+              "$base" "${{ forgejo.sha }}" -- 'srcpkgs/*/template' \
+              | cut -d/ -f2 \
+              | tr '\n' ' ')
+            echo "deleted=$deleted" >> $FORGEJO_OUTPUT
+            if [ -z "$deleted" ]; then
+              echo "No deleted packages"
+            else
+              echo "Deleted packages: $deleted"
             fi
           fi
 
@@ -110,6 +121,23 @@ jobs:
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
             sudo -Eu builder ./xbps-src -j4 -E -s pkg $pkg
+          done
+
+      - name: Remove deleted packages
+        if: steps.changed.outputs.deleted != ''
+        run: |
+          packages=$(curl --silent --request GET \
+            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+            "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" \
+            | jq --raw-output 'if type == "array" then .[].name else empty end')
+
+          for pkg in ${{ steps.changed.outputs.deleted }}; do
+            for match in $(echo "$packages" | grep "^${pkg}-"); do
+              echo -n "Deleting $match "
+              curl --silent --request DELETE --write-out "\n" \
+                --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+                "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$match"
+            done
           done
 
       - name: Sign and index packages
