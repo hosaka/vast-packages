@@ -1,6 +1,6 @@
 #!/bin/bash
-# Forgejo generic package registry helpers.
-# Requires: FORGEJO_URL, XBPS_UPLOAD_TOKEN, FORGEJO_REPOSITORY_OWNER
+# Forgejo generic package registry access
+# Requires: jq, curl and XBPS_UPLOAD_TOKEN env var
 
 set -e
 
@@ -15,30 +15,32 @@ shift
 
 case "$cmd" in
 list)
+  # Usage: forgejo.sh list
   curl --silent \
     "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" |
     jq --raw-output 'if type == "array" then .[].name else empty end'
   ;;
 
 download)
-  # Usage: forgejo.sh download <filename>
+  # Usage: forgejo.sh download <filepath>
   file="$1"
   echo -n "Downloading $file "
   curl --silent --fail --write-out "\n" --output "$file" "$XBPS_REPO_URL/$file"
   ;;
 
 delete)
-  # Usage: forgejo.sh delete <filename>
+  # Usage: forgejo.sh delete <filepath>
   file="$1"
   echo -n "Deleting $file "
   curl --silent --request DELETE --write-out "\n" --header "$AUTH" "$XBPS_REPO_URL/$file"
   ;;
 
 upload)
-  # Usage: forgejo.sh upload <filename>
-  file="$1"
+  # Usage: forgejo.sh upload <filepath>
+  filepath="$1"
+  file=$(basename "$filepath")
   echo -n "Uploading $file "
-  curl --silent --request PUT --write-out "\n" --header "$AUTH" --upload-file "$file" "$XBPS_REPO_URL/$file"
+  curl --silent --request PUT --write-out "\n" --header "$AUTH" --upload-file "$filepath" "$XBPS_REPO_URL/$file"
   ;;
 
 clone)

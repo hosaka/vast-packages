@@ -30,7 +30,7 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i 's|repo-default|repo-ci|g' /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -64,6 +64,7 @@ jobs:
             else
               base="${{ forgejo.event.before }}"
             fi
+
             packages=$(git diff-tree -r --no-renames --name-only --diff-filter=AM \
               "$base" "${{ forgejo.sha }}" -- 'srcpkgs/*/template' \
               | cut -d/ -f2 \
@@ -75,11 +76,13 @@ jobs:
             else
               echo "Changed packages: $packages"
             fi
+
             deleted=$(git diff-tree -r --no-renames --name-only --diff-filter=D \
               "$base" "${{ forgejo.sha }}" -- 'srcpkgs/*/template' \
               | cut -d/ -f2 \
               | tr '\n' ' ')
             echo "deleted=$deleted" >> $FORGEJO_OUTPUT
+
             if [ -z "$deleted" ]; then
               echo "No deleted packages"
             else
@@ -88,6 +91,16 @@ jobs:
           fi
 
       - name: Restore hostdir repocache
+        if: steps.changed.outputs.packages != ''
+        run: |
+          cd void-packages
+          for pkg in ${{ steps.changed.outputs.packages }}; do
+            echo "Linting $pkg"
+            sudo -Eu builder xlint $pkg
+          done
+
+      - name: Restore hostdir repocache
+        if: steps.changed.outputs.packages != ''
         id: cache
         uses: https://data.forgejo.org/actions/cache/restore@v5
         with:
@@ -144,9 +157,7 @@ jobs:
           xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign-pkg *.xbps
 
           # download existing repodata that contains all previously registered packages
-          if [ "${{ forgejo.event_name }}" != "workflow_dispatch" ]; then
-            $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata || echo "No existing repodata"
-          fi
+          $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata || echo "No existing repodata"
 
           # add newly built packages to the index (updates existing entries if version is greater)
           xbps-rindex --add *.xbps
@@ -170,10 +181,7 @@ jobs:
       - name: Upload packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
-          cd void-packages/hostdir/binpkgs
-
-          for pkg in *{.xbps,.sig2,-repodata}; do
-            $FORGEJO_WORKSPACE/scripts/forgejo.sh upload "$pkg"
+          for pkg in void-packages/hostdir/binpkgs/*{.xbps,.sig2,-repodata}; do
+            scripts/forgejo.sh upload "$pkg"
           done
-
-          $FORGEJO_WORKSPACE/scripts/forgejo.sh link
+          scripts/forgejo.sh link
