@@ -21,7 +21,7 @@ jobs:
       options: --privileged --platform linux/amd64
       env:
         FORGEJO_URL: https://code.hosaka.cc
-        XBPS_REPO_NAME: vast-packages
+        XBPS_UPLOAD_TOKEN: ${{ secrets.XBPS_UPLOAD_TOKEN }}
 
     steps:
       - name: Prepare container
@@ -124,24 +124,18 @@ jobs:
           done
 
       - name: Remove deleted packages
-        if: steps.changed.outputs.deleted != ''
+        if: steps.changed.outputs.deleted != '' && forgejo.event_name != 'pull_request'
         run: |
-          packages=$(curl --silent --request GET \
-            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-            "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" \
-            | jq --raw-output 'if type == "array" then .[].name else empty end')
+          packages=$(scripts/forgejo.sh list)
 
           for pkg in ${{ steps.changed.outputs.deleted }}; do
             for match in $(echo "$packages" | grep "^${pkg}-"); do
-              echo -n "Deleting $match "
-              curl --silent --request DELETE --write-out "\n" \
-                --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-                "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$match"
+              scripts/forgejo.sh delete "$match"
             done
           done
 
       - name: Sign and index packages
-        if: steps.changed.outputs.packages != ''
+        if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
           cd void-packages/hostdir/binpkgs
           echo "${{ secrets.XBPS_PRIVATE_KEY }}" > /tmp/private.pem
@@ -149,13 +143,9 @@ jobs:
           # sign newly built packages
           xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign-pkg *.xbps
 
-          # download existing repodata so the index already contains all previously registered packages
+          # download existing repodata that contains all previously registered packages
           if [ "${{ forgejo.event_name }}" != "workflow_dispatch" ]; then
-            echo -n "Downloading existing x86_64-repodata "
-            curl --silent --request GET --write-out "\n" \
-              --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-              --output x86_64-repodata \
-              "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
+            $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata
           fi
 
           # add newly built packages to the index (updates existing entries if version is greater)
@@ -166,45 +156,23 @@ jobs:
           rm /tmp/private.pem
 
       - name: Remove old packages
-        if: steps.changed.outputs.packages != ''
+        if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
-          cd void-packages/hostdir/binpkgs
-
-          packages=$(curl --silent --request GET \
-            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-            "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" \
-            | jq --raw-output 'if type == "array" then .[].name else empty end')
-
-          echo -n "Deleting x86_64-repodata "
-          curl --silent --request DELETE --write-out "\n" \
-            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-            "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
+          packages=$(scripts/forgejo.sh list)
+          scripts/forgejo.sh delete x86_64-repodata
 
           for pkg in ${{ steps.changed.outputs.packages }}; do
-            pkgname=$(xbps-query --repository . --property pkgname $pkg) || continue
+            pkgname=$(xbps-query --repository void-packages/hostdir/binpkgs --property pkgname $pkg) || continue
             for match in $(echo "$packages" | grep "^${pkgname}-"); do
-              echo -n "Deleting $match "
-              curl --silent --request DELETE --write-out "\n" \
-                --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-                "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$match"
+              scripts/forgejo.sh delete "$match"
             done
           done
 
       - name: Upload packages
-        if: steps.changed.outputs.packages != ''
+        if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
-          cd void-packages/hostdir/binpkgs
-
-          for pkg in *{.xbps,.sig2,-repodata}; do
-            echo -n "Uploading $pkg "
-            curl --silent --request PUT --write-out "\n" \
-              --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-              --upload-file "$pkg" \
-              "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/$pkg"
+          for pkg in void-packages/hostdir/binpkgs/*{.xbps,.sig2,-repodata}; do
+            scripts/forgejo.sh upload "$pkg"
           done
 
-          # todo: link to this repo (says repository does not exists for some reason)
-          echo -n "Linking to this repo "
-          curl --silent --request POST --write-out "\n" \
-            --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
-            "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/-/link/$XBPS_REPO_NAME"
+          scripts/forgejo.sh link
