@@ -1,0 +1,17 @@
+diff --git a/pywalfox/bin/main.sh b/pywalfox/bin/main.sh
+index dd37a41..520f4a8 100755
+--- a/pywalfox/bin/main.sh
++++ b/pywalfox/bin/main.sh
+@@ -1,10 +1,4 @@
+ #!/usr/bin/env bash
+ 
+-# Checks OS Version Number
+-macOS=$(sw_vers -productVersion)
+-if [[ ${#macOS} > 0  ]]; then
+-    PATH="$PATH:/usr/local/bin"
+-    pywalfox start
+-fi
+-
+-python -m pywalfox start || python3 -m pywalfox start || python2.7 -m pywalfox start || python3.9 -m pywalfox start
++PATH="$PATH:/usr/local/bin"
++pywalfox start

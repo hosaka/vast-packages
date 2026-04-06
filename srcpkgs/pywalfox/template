@@ -1,0 +1,17 @@
+# Template file for 'pywalfox'
+pkgname=pywalfox
+version=2.7.4
+revision=1
+build_style=python3-pep517
+makedepends="python3-setuptools"
+depends="python3"
+short_desc="Native app used alongside the Pywalfox browser extension"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MPL-2.0"
+homepage="https://github.com/Frewacom/pywalfox-native"
+distfiles="https://github.com/Frewacom/pywalfox-native/archive/v${version}.tar.gz"
+checksum=c6602edd68e1cd71ad8e8ce3e497e32f6ba4468b6d32df328e3c14d380004722
+
+post_install() {
+	vlicense LICENSE
+}
