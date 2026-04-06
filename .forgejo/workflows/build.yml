@@ -117,14 +117,29 @@ jobs:
             [ $ret -ne 0 ] && echo "Skiping $pkg (exit $ret)"
           done
 
-      - name: Index and sign packages
+      - name: Sign and index packages
         if: steps.changed.outputs.packages != ''
         run: |
           cd void-packages/hostdir/binpkgs
           echo "${{ secrets.XBPS_PRIVATE_KEY }}" > /tmp/private.pem
+
+          # sign newly built packages
           xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign-pkg *.xbps
-          xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign  .
+
+          # download existing repodata so the index already contains all previously registered packages
+          if [ "${{ forgejo.event_name }}" != "workflow_dispatch" ]; then
+            echo -n "Downloading existing x86_64-repodata "
+            curl --silent --request GET --write-out "\n" \
+              --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
+              --output x86_64-repodata \
+              "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
+          fi
+
+          # add newly built packages to the index (updates existing entries if version is greater)
           xbps-rindex --add *.xbps
+
+          # sign the updated repodata
+          xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign .
           rm /tmp/private.pem
 
       - name: Remove old packages
@@ -137,13 +152,11 @@ jobs:
             "$FORGEJO_URL/api/v1/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/files" \
             | jq --raw-output 'if type == "array" then .[].name else empty end')
 
-          # delete repodata
           echo -n "Deleting x86_64-repodata "
           curl --silent --request DELETE --write-out "\n" \
             --header "Authorization: token ${{ secrets.XBPS_UPLOAD_TOKEN }}" \
             "$FORGEJO_URL/api/packages/$FORGEJO_REPOSITORY_OWNER/generic/$XBPS_REPO_NAME/current/x86_64-repodata"
 
-          # delete changed packages (skipped packages are ignored)
           for pkg in ${{ steps.changed.outputs.packages }}; do
             pkgname=$(xbps-query --repository . --property pkgname $pkg) || continue
             for match in $(echo "$packages" | grep "^${pkgname}-"); do
