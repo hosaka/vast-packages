@@ -130,21 +130,9 @@ jobs:
       - name: Build packages
         if: steps.changed.outputs.packages != ''
         run: |
-          cd void-packages
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder ./xbps-src -j4 -E -s pkg $pkg
-          done
-
-      - name: Remove deleted packages
-        if: steps.changed.outputs.deleted != '' && forgejo.event_name != 'pull_request'
-        run: |
-          packages=$(scripts/forgejo.sh list)
-
-          for pkg in ${{ steps.changed.outputs.deleted }}; do
-            for match in $(echo "$packages" | grep "^${pkg}-"); do
-              scripts/forgejo.sh delete "$match"
-            done
+            sudo -Eu builder void-packages/xbps-src -j4 -E -s pkg $pkg
           done
 
       - name: Sign and index packages
@@ -166,6 +154,16 @@ jobs:
           xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign .
           rm /tmp/private.pem
 
+      - name: Remove deleted packages
+        if: steps.changed.outputs.deleted != '' && forgejo.event_name != 'pull_request'
+        run: |
+          packages=$(scripts/forgejo.sh list)
+          for pkg in ${{ steps.changed.outputs.deleted }}; do
+            for match in $(echo "$packages" | grep "^${pkg}-"); do
+              scripts/forgejo.sh delete "$match"
+            done
+          done
+
       - name: Remove old packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
@@ -181,7 +179,13 @@ jobs:
       - name: Upload packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
-          for pkg in void-packages/hostdir/binpkgs/*{.xbps,.sig2,-repodata}; do
+          for pkg in void-packages/hostdir/binpkgs/*{.xbps,.sig2}; do
             scripts/forgejo.sh upload "$pkg"
           done
+
+      - name: Upload repodata
+        if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
+        run: |
+          scripts/forgejo.sh delete x86_64-repodata
+          scripts/forgejo.sh upload void-packages/hostdir/binpkgs/x86_64-repodata
           scripts/forgejo.sh link
