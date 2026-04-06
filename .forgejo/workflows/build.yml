@@ -171,8 +171,10 @@ jobs:
       - name: Upload packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
-          for pkg in void-packages/hostdir/binpkgs/*{.xbps,.sig2,-repodata}; do
-            scripts/forgejo.sh upload "$pkg"
+          cd void-packages/hostdir/binpkgs
+
+          for pkg in *{.xbps,.sig2,-repodata}; do
+            $FORGEJO_WORKSPACE/scripts/forgejo.sh upload "$pkg"
           done
 
-          scripts/forgejo.sh link
+          $FORGEJO_WORKSPACE/scripts/forgejo.sh link
