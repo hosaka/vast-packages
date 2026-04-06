@@ -90,7 +90,7 @@ jobs:
             fi
           fi
 
-      - name: Restore hostdir repocache
+      - name: Lint changed packages
         if: steps.changed.outputs.packages != ''
         run: |
           cd void-packages
