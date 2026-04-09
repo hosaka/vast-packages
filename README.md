@@ -2,7 +2,20 @@
 
 This repository contains my personal XBPS source packages collection to build binary packages for the Void Linux distribution. It mainly contains packages that cannot get accepted in the official [void-packages](https://github.com/void-linux/void-packages) repository according to the [Manual](https://github.com/void-linux/void-packages/blob/master/Manual.md).
 
+## Binary Repo
+A binary repository is hosted using a [Generic Package Registry](https://forgejo.org/docs/latest/user/packages/generic/). Packages added to srcpkgs/ are automatically built, signed and deployed via a CI workflow. Add this repository to XBPS:
+```bash
+echo "repository=https://hosaka.cc/void/current" > /etc/xbps.d/42-hosaka.conf
+```
+
+Install packages using `xbps-install` as usual:
+```bash
+xbps-install -S <package>
+```
+
 ## Upstream
+
+When a package can be submitted to the official repos, a PR is opened. If and when a PR gets merged, the package will be removed from this repo. If a removed package has previously been installed via `xbps-install` from this repository the package manager will fallback to the official repo automatically.
 
 - `bob`: [PR](https://github.com/void-linux/void-packages/pull/59155) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/bob/template)
 - `just-lsp`: [PR](https://github.com/void-linux/void-packages/pull/59161) [Merged](https://github.com/void-linux/void-packages/blob/master/srcpkgs/just-lsp/template)
