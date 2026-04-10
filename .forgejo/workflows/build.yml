@@ -108,6 +108,7 @@ jobs:
           echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
           echo XBPS_CHROOT_CMD=uchroot >> etc/conf
           echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
+          echo XBPS_MIRROR=https://$XBPS_MIRROR_URL/current >> etc/conf
           sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Build packages
