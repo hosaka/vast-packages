@@ -20,8 +20,9 @@ jobs:
       image: ghcr.io/void-linux/void-glibc-full:latest
       options: --privileged --platform linux/amd64
       env:
-        FORGEJO_URL: https://code.hosaka.cc
+        FORGEJO_URL: https://code.box.hosaka.cc
         VOID_PACKAGES_REPO: https://code.box.hosaka.cc/github/void-packages.git
+        XBPS_MIRROR_URL: mirror.box.hosaka.cc/voidlinux
         XBPS_UPLOAD_TOKEN: ${{ secrets.XBPS_UPLOAD_TOKEN }}
 
     steps:
@@ -29,7 +30,7 @@ jobs:
         run: |
           # switch to repo-ci mirror
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
-          sed -i 's|repo-default|repo-ci|g' /etc/xbps.d/*-repository-*.conf
+          sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
           xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools
           # create non-root user
