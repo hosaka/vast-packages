@@ -21,6 +21,7 @@ jobs:
       options: --privileged --platform linux/amd64
       env:
         FORGEJO_URL: https://code.hosaka.cc
+        VOID_PACKAGES_REPO: https://code.box.hosaka.cc/github/void-packages.git
         XBPS_UPLOAD_TOKEN: ${{ secrets.XBPS_UPLOAD_TOKEN }}
 
     steps:
@@ -44,7 +45,7 @@ jobs:
 
       - name: Setup void-packages
         run: |
-          git clone --depth=1 https://github.com/void-linux/void-packages
+          git clone --depth=1 $VOID_PACKAGES_REPO
           git config --global --add safe.directory "$PWD/void-packages"
           cp -r srcpkgs/* void-packages/srcpkgs/
           chown -R builder:builder void-packages
