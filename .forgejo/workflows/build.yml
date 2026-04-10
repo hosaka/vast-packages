@@ -32,7 +32,7 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq xtools
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -101,33 +101,14 @@ jobs:
             sudo -Eu builder xlint $pkg
           done
 
-      - name: Restore hostdir repocache
-        if: steps.changed.outputs.packages != ''
-        id: cache
-        uses: https://data.forgejo.org/actions/cache/restore@v5
-        with:
-          path: void-packages/hostdir/repocache-x86_64
-          key: repocache-${{ forgejo.run_id }}
-          restore-keys: repocache-
-
       - name: Prepare void-packages masterdir
         if: steps.changed.outputs.packages != ''
         run: |
-          # set permissions again in case repocache was restored
-          chown -R builder:builder void-packages
-
           cd void-packages
           echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
           echo XBPS_CHROOT_CMD=uchroot >> etc/conf
           echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf
           sudo -Eu builder ./xbps-src binary-bootstrap
-
-      - name: Save hostdir repocache
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: https://data.forgejo.org/actions/cache/save@v5
-        with:
-          path: void-packages/hostdir/repocache-x86_64
-          key: ${{ steps.cache.outputs.cache-primary-key }}
 
       - name: Build packages
         if: steps.changed.outputs.packages != ''
