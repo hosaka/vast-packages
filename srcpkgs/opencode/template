@@ -1,0 +1,29 @@
+# Template file for 'opencode'
+pkgname=opencode
+version=1.14.19
+revision=1
+hostmakedepends="nodejs python3"
+short_desc="Open source coding agent"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://opencode.ai"
+distfiles="https://github.com/anomalyco/opencode/archive/refs/tags/v${version}.tar.gz"
+checksum=ff6bc17f14cb351b3d1669932bf29b00c965da6cf8fa09400d7532610b33bc33
+nostrip=yes
+
+export OPENCODE_VERSION=${version}
+
+do_build() {
+	npm install -g bun
+	bun install --frozen-lockfile --cpu=x64 --os=linux
+	packages/opencode/script/build.ts --single --skip-embed-web-ui
+}
+
+# do_check() {
+# 	bun test --cwd packages/opencode
+# }
+
+do_install() {
+	vlicense LICENSE
+	vbin packages/opencode/dist/opencode-linux-x64/bin/opencode
+}
