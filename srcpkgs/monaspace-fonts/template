@@ -1,0 +1,71 @@
+# Template file for 'monaspace-fonts'
+pkgname=monaspace-fonts
+version=1.400
+revision=1
+makedepends="wget"
+depends="monaspace-fonts-static>=${version}_${revision}
+ monaspace-fonts-nerdfonts>=${version}_${revision}"
+short_desc="Innovative superfamily of fonts for code"
+maintainer="Alex March <alex@hosaka.cc>"
+license="OFL-1.1"
+homepage="https://monaspace.githubnext.com/"
+changelog="https://github.com/githubnext/monaspace/releases"
+distfiles="https://github.com/githubnext/monaspace/releases/download/v${version}/monaspace-static-v${version}.zip
+ https://github.com/githubnext/monaspace/releases/download/v${version}/monaspace-nerdfonts-v${version}.zip"
+checksum="ab66d71be751495f679727332a3345597943bd4d7beebca03f5cde04bf994de7
+ 9b7f9505d977601d8819dfdb57fa4b49bdab61132b6d1131c2e8d092066edc5a"
+font_dirs="/usr/share/fonts/monaspace/"
+
+_families=(
+	'Monaspace Argon'
+	'Monaspace Krypton'
+	'Monaspace Neon'
+	'Monaspace Radon'
+	'Monaspace Xenon'
+)
+
+_types=(
+	'Static Fonts'
+	'NerdFonts'
+)
+
+do_install() {
+	vmkdir usr/share/fonts/monaspace
+	vmkdir usr/share/fonts/monaspace/Static\ Fonts
+	vmkdir usr/share/fonts/monaspace/NerdFonts
+
+	for family in "${_families[@]}"; do
+		for type in "${_types[@]}"; do
+			vcopy "${type}/${family}/*.otf" "usr/share/fonts/monaspace/${type}"
+		done
+	done
+
+	wget -q https://github.com/githubnext/monaspace/raw/refs/heads/main/LICENSE
+	vlicense LICENSE
+}
+
+monaspace-fonts-static_package() {
+	short_desc+=" - individual fonts for each weight and style"
+	font_dirs="/usr/share/fonts/monaspace/Static Fonts"
+	depends="font-util"
+	pkg_install() {
+		vmove usr/share/fonts/monaspace/Static\ Fonts
+	}
+}
+
+# monaspace-fonts-variable_package() {
+# 	short_desc+=" - Variable fonts with adjustable weight/width"
+# }
+
+# monaspace-fonts-frozen_package() {
+# 	short_desc+=" - Fonts with all stylistic sets baked in by default"
+# }
+
+monaspace-fonts-nerdfonts_package() {
+	short_desc+=" - fonts patched with NerdFonts glyphs"
+	font_dirs="/usr/share/fonts/monaspace/NerdFonts"
+	depends="font-util"
+	pkg_install() {
+		vmove usr/share/fonts/monaspace/NerdFonts
+	}
+}
