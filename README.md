@@ -27,6 +27,7 @@ When a package can be submitted to the official repos, a PR is opened. If and wh
 
 - [feishin](https://github.com/jeffvli/feishin): upstream will treat this with "electron 🤮"
 - [font-monaspace](https://github.com/githubnext/monaspace)
+- [font-maple](https://github.com/subframe7536/maple-font)
 - [hadolint](https://github.com/hadolint/hadolint): requires GHC 9.10.2 (base >= 4.20.1) but void packages [GHC 9.8.4](https://github.com/void-linux/void-packages/tree/master/srcpkgs/ghc)
 - [limine-entry-tool](https://gitlab.com/Zesko/limine-entry-tool): requires GraalVM 25 but void packages [Mandrel 23](https://github.com/void-linux/void-packages/tree/master/srcpkgs/mandrel)
 - [limine-snapper-sync](https://gitlab.com/Zesko/limine-snapper-sync): same issue as above
@@ -34,6 +35,6 @@ When a package can be submitted to the official repos, a PR is opened. If and wh
 
 ## Mirrors
 This repository is hosted on [Forgejo](https://code.hosaka.cc/hosaka/vast-packages) which mirrors to the following git forges:
-- https://codeberg.org/hosaka/vast-packages
-- https://github.com/hosaka/vast-packages
+- [<img src="https://raw.githubusercontent.com/humanetech-community/awesome-humane-tech/main/logo/codeberg.svg?sanitize=true" width="16"/>](https://codeberg.org/hosaka/vast-packages) - https://codeberg.org/hosaka/vast-packages
+- [<img src="https://raw.githubusercontent.com/humanetech-community/awesome-humane-tech/main/logo/github.svg?sanitize=true" width="16"/>](https://github.com/hosaka/vast-packages) - https://github.com/hosaka/vast-packages
 
