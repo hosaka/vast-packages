@@ -1,6 +1,6 @@
 # Template file for 'opencode'
 pkgname=opencode
-version=1.14.30
+version=1.15.0
 revision=1
 hostmakedepends="nodejs python3"
 short_desc="Open source coding agent"
@@ -8,7 +8,7 @@ maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
 homepage="https://opencode.ai"
 distfiles="https://github.com/anomalyco/opencode/archive/refs/tags/v${version}.tar.gz"
-checksum=9c221f9008fe56d0808b4b182ac0055e093650190342428aa87b58caf4b1cefb
+checksum=9afbb063fdbd19d3a75dca9c5808783662a1401ce110416c7969cf4af1901111
 nostrip=yes
 
 build_options="nowebui"
