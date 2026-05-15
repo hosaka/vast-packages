@@ -24,17 +24,19 @@ jobs:
         VOID_PACKAGES_REPO: https://code.box.hosaka.cc/github/void-packages.git
         XBPS_MIRROR_URL: mirror.box.hosaka.cc/voidlinux
         XBPS_UPLOAD_TOKEN: ${{ secrets.XBPS_UPLOAD_TOKEN }}
-        XBPS_VAST_PACKAGES_REPO: https://hosaka.cc/void/current
+        XBPS_VAST_PACKAGES_REPO: https://code.box.hosaka.cc/api/packages/hosaka/generic/vast-packages
 
     steps:
       - name: Prepare container
         run: |
-          # switch to repo-ci mirror and add vast-packages repo
+          # switch to our own mirror (upstream uses a repo-ci.voidlinux.org instead)
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
-          echo "repository=$XBPS_VAST_PACKAGES_REPO" >> /etc/xbps.d/99-vast-packages.conf
           # install dependencies
           xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq xtools
+          # add vast-packages repo and public key (piping with yes because I couldn't get a plist file working)
+          echo "repository=$XBPS_VAST_PACKAGES_REPO/current" >> /etc/xbps.d/99-vast-packages.conf
+          yes | xbps-install -S
           # create non-root user
           useradd -G xbuilder -M builder
 
