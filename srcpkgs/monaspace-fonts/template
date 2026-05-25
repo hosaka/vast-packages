@@ -15,6 +15,7 @@ distfiles="https://github.com/githubnext/monaspace/releases/download/v${version}
 checksum="ab66d71be751495f679727332a3345597943bd4d7beebca03f5cde04bf994de7
  9b7f9505d977601d8819dfdb57fa4b49bdab61132b6d1131c2e8d092066edc5a"
 font_dirs="/usr/share/fonts/monaspace/"
+provides="font:monospace-0_1"
 
 _families=(
 	'Monaspace Argon'
