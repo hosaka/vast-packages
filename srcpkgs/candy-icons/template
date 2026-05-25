@@ -1,0 +1,26 @@
+# Template file for 'candy-icons'
+pkgname=candy-icons
+version=0.23
+revision=1
+short_desc="Sweet gradient icons"
+maintainer="Alex March <alex@hosaka.cc>"
+license="GPL-3.0-or-later"
+homepage="https://github.com/EliverLara/candy-icons"
+# the releases are not tagged but there is a version on opendesktop.org
+# see: https://opendesktop.org/p/1305251/
+distfiles="https://github.com/EliverLara/candy-icons/archive/refs/heads/master.tar.gz"
+checksum=1582e35f1cc1fa90a3673ad2e7100263c744575b2579cac0ad01dd9617413c6f
+nostrip=yes
+
+do_install() {
+	local dest="usr/share/icons/candy-icons"
+	vmkdir $dest
+
+	vcopy "apps/" $dest
+	vcopy "devices/" $dest
+	vcopy "mimetypes/" $dest
+	vcopy "places/" $dest
+	vcopy "preferences/" $dest
+	vcopy "status/" $dest
+	vcopy "index.theme" $dest
+}
