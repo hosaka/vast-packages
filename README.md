@@ -26,7 +26,6 @@ When a package can be submitted to the official repos, a PR is opened. If and wh
 ## Wishlist
 
 - [feishin](https://github.com/jeffvli/feishin): upstream will treat this with "electron 🤮"
-- [Bibata_Cursor](https://github.com/ful1e5/Bibata_Cursor): so ReGreet can use it before login
 - [font-maple](https://github.com/subframe7536/maple-font): looks nice
 - [candy-icons](https://github.com/EliverLara/candy-icons): looks nice
 - [hadolint](https://github.com/hadolint/hadolint): requires GHC 9.10.2 (base >= 4.20.1) but void packages [GHC 9.8.4](https://github.com/void-linux/void-packages/tree/master/srcpkgs/ghc)
