@@ -1,0 +1,42 @@
+# Template file for 'maple-fonts'
+pkgname=maple-fonts
+version=7.9
+revision=1
+depends="${pkgname}-nerdfonts>=${version}_${revision}
+ ${pkgname}-nerdfonts-cn>=${version}_${revision}"
+short_desc="Open source monospace font focused on coding"
+maintainer="Alex March <alex@hosaka.cc>"
+license="OFL-1.1"
+homepage="https://font.subf.dev"
+changelog="https://github.com/subframe7536/maple-font/releases"
+distfiles="https://github.com/subframe7536/maple-font/releases/download/v${version}/MapleMono-NF.zip
+ https://github.com/subframe7536/maple-font/releases/download/v${version}/MapleMono-NF-CN.zip"
+checksum="59098b87c895d871635d37680e88000ae2b2b25b55428195b228ec589e35fb89
+ af913b6322905348b3f50e4397fedc35b3a880db5effcce7969003051dcd3e94"
+font_dirs="/usr/share/fonts/maple/"
+provides="font:monospace-0_1"
+nostrip=yes
+
+do_install() {
+	vmkdir usr/share/fonts/maple
+	vcopy "*.ttf" usr/share/fonts/maple
+	vlicense LICENSE.txt
+}
+
+maple-fonts-nerdfonts_package() {
+	short_desc+=" - fonts patched with NerdFonts glyphs"
+	font_dirs="/usr/share/fonts/maple/"
+	depends="font-util"
+	pkg_install() {
+		vmove usr/share/fonts/maple/MapleMono-NF-*.ttf
+	}
+}
+
+maple-fonts-nerdfonts-cn_package() {
+	short_desc+=" - NerdFonts glyphs with Chinese and Japanese support"
+	font_dirs="/usr/share/fonts/maple/"
+	depends="font-util"
+	pkg_install() {
+		vmove usr/share/fonts/maple/MapleMono-NF-CN-*.ttf
+	}
+}
