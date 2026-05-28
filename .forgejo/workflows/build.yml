@@ -66,7 +66,7 @@ jobs:
           else
             # build only packages whose template changed
             if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
-              base="${{ forgejo.event.pull_request.base.sha }}"
+              base=$(git merge-base HEAD "origin/${{ forgejo.event.pull_request.base.ref }}")
             else
               base="${{ forgejo.event.before }}"
             fi
