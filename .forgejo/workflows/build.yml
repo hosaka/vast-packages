@@ -34,9 +34,6 @@ jobs:
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
           xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq xtools
-          # add vast-packages repo and public key (piping with yes because I couldn't get a plist file working)
-          echo "repository=$XBPS_VAST_PACKAGES_REPO/current" >> /etc/xbps.d/99-vast-packages.conf
-          yes | xbps-install -S
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -115,6 +112,11 @@ jobs:
           echo XBPS_CHROOT_CMD=uchroot >> etc/conf
           echo XBPS_MAKEJOBS=4 >> etc/conf
           echo XBPS_MIRROR=https://$XBPS_MIRROR_URL/current >> etc/conf
+          # inject our repo and signing key into the xbps-src build chroot
+          # this allows xbps-src to correctly find dependencies in vast-packages
+          mkdir -p etc/xbps.d/custom etc/repo-keys
+          echo "repository=$XBPS_VAST_PACKAGES_REPO/current" >> etc/xbps.d/custom/99-vast-packages.conf
+          cp $FORGEJO_WORKSPACE/keys/*.plist etc/repo-keys/
           sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Build packages
