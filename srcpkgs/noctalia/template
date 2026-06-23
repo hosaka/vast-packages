@@ -1,0 +1,31 @@
+# Template file for 'noctalia'
+pkgname=noctalia
+version=5.0.0.a5eeef1
+revision=1
+build_style=meson
+# configure_args="--buildtype=release"
+hostmakedepends="pkg-config git"
+makedepends="MesaLib-devel basu-devel cairo-devel fontconfig-devel freetype-devel
+ harfbuzz-devel jemalloc-devel libcurl-devel libepoxy-devel libglvnd-devel
+ libqalculate-devel librsvg-devel libwebp-devel libxkbcommon-devel libxml2-devel
+ pam-devel pango-devel pipewire-devel polkit-devel sdbus-c++-devel wayland-devel
+ wayland-protocols"
+depends="wayland pipewire pam libwebp basu jemalloc"
+short_desc="Desktop shell built on Wayland and OpenGL ES"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://github.com/noctalia-dev/noctalia-shell"
+changelog="https://github.com/noctalia-dev/noctalia-shell/releases"
+
+# curl -sL https://api.github.com/repos/noctalia-dev/noctalia/commits/main | jq -r '.sha' | cut -c 1-7
+CXXFLAGS="-std=c++23"
+
+do_fetch() {
+	git clone https://github.com/noctalia-dev/noctalia.git ${wrksrc}
+	cd ${wrksrc}
+	git checkout ${version##*.}
+}
+
+post_install() {
+	vlicense LICENSE
+}
