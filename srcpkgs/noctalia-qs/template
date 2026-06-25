@@ -1,7 +1,7 @@
 # Template file for 'noctalia-qs'
 pkgname=noctalia-qs
 version=0.0.12
-revision=1
+revision=2
 build_style=cmake
 configure_args="-DCMAKE_BUILD_TYPE=Release -DINSTALL_QML_PREFIX=lib/qt6/qml
  -DDISTRIBUTOR=Void -DCRASH_REPORTER=OFF"
@@ -21,6 +21,6 @@ conflicts="quickshell"
 
 pre_configure() {
 	local rev
-  rev=$(curl -s https://api.github.com/repos/noctalia-dev/noctalia-qs/git/refs/tags/v${version} | jq '.["object"].["sha"]' )
+	rev=$(curl -s https://api.github.com/repos/noctalia-dev/noctalia-qs/git/refs/tags/v${version} | jq '.["object"].["sha"]' )
 	configure_args+=" -DGIT_REVISION=${rev}"
 }
