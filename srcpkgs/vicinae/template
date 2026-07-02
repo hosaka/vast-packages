@@ -1,6 +1,6 @@
 # Template file for 'vicinae'
 pkgname=vicinae
-version=0.21.7
+version=0.22.1
 revision=1
 build_style=cmake
 configure_args="-DCMAKE_BUILD_TYPE=Release -DLTO=ON
@@ -15,4 +15,4 @@ maintainer="Alex March <alex@hosaka.cc>"
 license="GPL-3.0-or-later"
 homepage="https://github.com/vicinaehq/vicinae"
 distfiles="https://github.com/vicinaehq/vicinae/archive/refs/tags/v${version}.tar.gz"
-checksum=8cc97260b0cf9bd70b25143350b3a74b593a9ba722427f582735957bcc8122d6
+checksum=6e2744be0142f83eb616a9b185ef996f34d9cb27f2d2eeb5b63ba8c36fed6187
