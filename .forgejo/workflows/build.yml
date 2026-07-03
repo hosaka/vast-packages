@@ -13,18 +13,18 @@ on:
 
 jobs:
   build:
-    runs-on: docker
+    runs-on: linux-amd64
     if: "!contains(forgejo.event.pull_request.title, '[ci skip]') && !contains(forgejo.event.pull_request.body, '[ci skip]')"
 
     container:
       image: ghcr.io/void-linux/void-glibc-full:latest
       options: --privileged --platform linux/amd64
       env:
-        FORGEJO_URL: https://code.box.hosaka.cc
-        VOID_PACKAGES_REPO: https://code.box.hosaka.cc/github/void-packages.git
-        XBPS_MIRROR_URL: mirror.box.hosaka.cc/voidlinux
+        FORGEJO_URL: https://code.hosaka.cc
+        VOID_PACKAGES_REPO: https://code.hosaka.cc/github/void-packages.git
+        XBPS_MIRROR_URL: mirror.hosaka.cc/voidlinux
         XBPS_UPLOAD_TOKEN: ${{ secrets.XBPS_UPLOAD_TOKEN }}
-        XBPS_VAST_PACKAGES_REPO: https://code.box.hosaka.cc/api/packages/hosaka/generic/vast-packages
+        XBPS_VAST_PACKAGES_REPO: https://code.hosaka.cc/api/packages/hosaka/generic/vast-packages
 
     steps:
       - name: Prepare container
@@ -109,7 +109,7 @@ jobs:
           echo XBPS_ALLOW_RESTRICTED=no >> etc/conf
           echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
           # echo XBPS_CHECK_PKGS=yes >> etc/conf
-          echo XBPS_CHROOT_CMD=uchroot >> etc/conf
+          echo XBPS_CHROOT_CMD=uunshare >> etc/conf
           echo XBPS_MAKEJOBS=4 >> etc/conf
           echo XBPS_MIRROR=https://$XBPS_MIRROR_URL/current >> etc/conf
           # inject our repo and signing key into the xbps-src build chroot
