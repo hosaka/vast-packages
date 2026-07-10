@@ -43,6 +43,11 @@ if [ -z "$distfiles" ]; then
   exit 1
 fi
 
+if [ -z "$checksum" ]; then
+  echo "gensum: no checksum variable in $template" >&2
+  exit 1
+fi
+
 sums=""
 for f in $distfiles; do
   # Strip >filename rename suffix to get the bare URL
