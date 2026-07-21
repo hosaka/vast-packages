@@ -1,6 +1,6 @@
 # Template file for 'noctalia'
 pkgname=noctalia
-version=5.0.0.beta2
+version=5.0.0.beta3
 revision=1
 build_style=meson
 configure_args="--buildtype=release"
@@ -17,8 +17,8 @@ maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia"
 changelog="https://github.com/noctalia-dev/noctalia/releases"
-distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version/.b/-b}.tar.gz"
-checksum=6329818e294feb141e079b0f4bcf1006b196ed74183f793fcf0feddf8b7540a0
+distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version/.beta/-beta.}.tar.gz"
+checksum=0cd9d718acb95eec8500e6159c2981de46070f13f0fdacf7cb1e51cb2cbddb5e
 
 CXXFLAGS="-std=c++23"
 
