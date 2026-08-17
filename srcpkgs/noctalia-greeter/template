@@ -1,13 +1,14 @@
 # Template file for 'noctalia-greeter'
 pkgname=noctalia-greeter
-version=1.0.0
+version=1.2.1
 revision=1
 build_style=meson
 configure_args="--buildtype=release"
 hostmakedepends="pkg-config git"
-makedepends="cairo-devel fontconfig-devel freetype-devel libepoxy-devel
- libglvnd-devel librsvg-devel libwebp-devel libxkbcommon-devel MesaLib-devel
- pango-devel tomlplusplus-devel wayland-devel wayland-protocols wlroots0.20-devel"
+makedepends="cairo-devel fontconfig-devel freetype-devel harfbuzz-devel json-c++
+ libepoxy-devel libglvnd-devel librsvg-devel libwebp-devel libxkbcommon-devel
+ MesaLib-devel pango-devel stb tomlplusplus-devel wayland-devel wayland-protocols
+ wlroots0.20-devel"
 depends="greetd dbus polkit"
 short_desc="Noctalia themed greeter for greetd"
 maintainer="Alex March <alex@hosaka.cc>"
@@ -15,7 +16,7 @@ license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia-greeter"
 changelog="https://github.com/noctalia-dev/noctalia-greeter/releases"
 distfiles="https://github.com/noctalia-dev/noctalia-greeter/archive/refs/tags/v${version}.tar.gz"
-checksum=974c0adc444dbe63be38d60f2ae0eedbd97cf1fc5844a9f022a7468b0a495ba3
+checksum=1d1c43494b74e75f4f18c5c0d2f5326b9b3b30f337156c05c45d4511a9a587e1
 
 CXXFLAGS="-std=c++23"
 
