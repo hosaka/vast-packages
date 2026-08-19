@@ -1,4 +1,9 @@
-# vast-packages
+# Vast Packages Repository
+
+[![Void Linux](https://img.shields.io/badge/Void_Linux-%23458161.svg?style=flat-square&logo=voidlinux&logoColor=white)](https://voidlinux.org/)
+[![x86_64-glibc](https://img.shields.io/badge/x86__64-glibc-478061?style=flat-square)](#)
+
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 This repository contains my personal XBPS source packages collection to build binary packages for the Void Linux distribution. It mainly contains packages that cannot get accepted in the official [void-packages](https://github.com/void-linux/void-packages) repository according to the [Manual](https://github.com/void-linux/void-packages/blob/master/Manual.md).
 
