@@ -8,7 +8,7 @@
 This repository contains my personal XBPS source packages collection to build binary packages for the Void Linux distribution. It mainly contains packages that cannot get accepted in the official [void-packages](https://github.com/void-linux/void-packages) repository according to the [Manual](https://github.com/void-linux/void-packages/blob/master/Manual.md).
 
 ## Binary Repo
-A binary repository is hosted using a [Generic Package Registry](https://forgejo.org/docs/latest/user/packages/generic/). Packages added to srcpkgs/ are automatically built, signed and deployed via a CI workflow. Add this repository to XBPS:
+A binary repository is hosted using a [Generic Package Registry](https://forgejo.org/docs/latest/user/packages/generic/). Packages added to [srcpkgs/](srcpkgs/) are automatically built, signed and deployed via a CI workflow. Add this repository to XBPS:
 ```bash
 echo "repository=https://hosaka.cc/void/current" > /etc/xbps.d/42-hosaka.conf
 ```
@@ -16,6 +16,13 @@ echo "repository=https://hosaka.cc/void/current" > /etc/xbps.d/42-hosaka.conf
 Install packages using `xbps-install` as usual:
 ```bash
 xbps-install -S <package>
+```
+
+When fetching from the repo for the first time XBPS will prompt to confirm the public key fingerprint: `d4:fe:01:8b:18:0e:5c:ea:25:00:50:a5:b5:77:78:2c`.
+
+List all available packages:
+```bash
+xbps-query --repository=https://hosaka.cc/void/current -iMs ''
 ```
 
 ## Upstream
