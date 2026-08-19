@@ -1,9 +1,13 @@
 # Template file for 'noctalia-greeter'
 pkgname=noctalia-greeter
 version=1.2.1
-revision=3
+revision=4
 build_style=meson
-configure_args="--buildtype=release"
+# Todo: release enables -march=native and -mtune=native which is not needed for CI
+# these should be put under `native_optimizations` option just like in noctalia itself
+# see: https://github.com/noctalia-dev/noctalia-greeter/blob/main/meson.build
+# see: https://github.com/noctalia-dev/noctalia/blob/main/meson.build
+# configure_args="--buildtype=release"
 hostmakedepends="pkg-config git"
 makedepends="cairo-devel fontconfig-devel freetype-devel harfbuzz-devel json-c++
  libepoxy-devel libglvnd-devel librsvg-devel libwebp-devel libxkbcommon-devel
