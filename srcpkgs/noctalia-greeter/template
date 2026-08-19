@@ -1,7 +1,7 @@
 # Template file for 'noctalia-greeter'
 pkgname=noctalia-greeter
 version=1.2.1
-revision=2
+revision=3
 build_style=meson
 configure_args="--buildtype=release"
 hostmakedepends="pkg-config git"
@@ -10,16 +10,20 @@ makedepends="cairo-devel fontconfig-devel freetype-devel harfbuzz-devel json-c++
  MesaLib-devel pango-devel stb tomlplusplus-devel wayland-devel wayland-protocols
  wlroots0.20-devel"
 depends="greetd dbus polkit"
-short_desc="Noctalia themed greeter for greetd"
+short_desc="Minimal greeter for greetd that matches the look of Noctalia shell"
 maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia-greeter"
 changelog="https://github.com/noctalia-dev/noctalia-greeter/releases"
 distfiles="https://github.com/noctalia-dev/noctalia-greeter/archive/refs/tags/v${version}.tar.gz"
 checksum=1d1c43494b74e75f4f18c5c0d2f5326b9b3b30f337156c05c45d4511a9a587e1
+make_dirs="/var/lib/noctalia-greeter 0750 _greeter _greeter"
 
 CXXFLAGS="-std=c++23"
 
+# Note: We probably don't need the scripts/*.sh installed by mason
+
 post_install() {
 	vlicense LICENSE
+	vsconf examples/greeter.toml
 }
