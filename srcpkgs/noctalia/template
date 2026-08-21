@@ -1,8 +1,9 @@
 # Template file for 'noctalia'
 pkgname=noctalia
-version=5.0.0.beta8
-revision=2
+version=5.0.0.beta9
+revision=1
 build_style=meson
+build_helper=qemu
 configure_args="--buildtype=release"
 hostmakedepends="pkg-config git"
 makedepends="MesaLib-devel basu-devel cairo-devel fontconfig-devel freetype-devel
@@ -17,7 +18,7 @@ license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia"
 changelog="https://github.com/noctalia-dev/noctalia/releases"
 distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version/.beta/-beta.}.tar.gz"
-checksum=a60e4ab8723f428e11b9a2bac97811aaa6a494648730abc61025c35cb728539e
+checksum=95173862a62ff36923212e9de6d58f789841acf147fea99d351fdbfae6a60eda
 
 CXXFLAGS="-std=c++23"
 
@@ -27,5 +28,10 @@ do_patch() {
 }
 
 post_install() {
+	for shell in bash fish zsh; do
+		vtargetrun ${DESTDIR}/usr/bin/noctalia completions ${shell} > noctalia.${shell}
+		vcompletion noctalia.${shell} ${shell}
+	done
+
 	vlicense LICENSE
 }
