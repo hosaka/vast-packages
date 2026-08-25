@@ -1,18 +1,18 @@
 # Template file for 'vicinae'
 pkgname=vicinae
-version=0.22.1
+version=0.26.3
 revision=1
 build_style=cmake
 configure_args="-DCMAKE_BUILD_TYPE=Release -DLTO=ON
  -DQT_NO_PRIVATE_MODULE_WARNING=ON"
-hostmakedepends="git nodejs mold qt6-base qt6-declarative-devel"
+hostmakedepends="git pkg-config nodejs mold qt6-base qt6-declarative-devel"
 makedepends="cmark-gfm-devel kf6-syntax-highlighting-devel layer-shell-qt-devel
  libqalculate-devel qt6-base-devel qt6-base-private-devel qt6-shadertools-devel
- qt6-svg-devel qtkeychain-qt6-devel"
+ qt6-svg-devel qt6-tools-devel qtkeychain-qt6-devel"
 depends="layer-shell-qt"
 short_desc="Focused, extensible launcher for your desktop"
 maintainer="Alex March <alex@hosaka.cc>"
 license="GPL-3.0-or-later"
 homepage="https://github.com/vicinaehq/vicinae"
 distfiles="https://github.com/vicinaehq/vicinae/archive/refs/tags/v${version}.tar.gz"
-checksum=6e2744be0142f83eb616a9b185ef996f34d9cb27f2d2eeb5b63ba8c36fed6187
+checksum=0717a31f0daac4872fb752e33db0fcdc4a9c2b64b145e1e9a444703b57ad23f2
