@@ -1,6 +1,6 @@
 # Template file for 'noctalia'
 pkgname=noctalia
-version=5.0.0.beta9
+version=5.0.0.beta10
 revision=1
 build_style=meson
 build_helper=qemu
@@ -18,7 +18,7 @@ license="MIT"
 homepage="https://github.com/noctalia-dev/noctalia"
 changelog="https://github.com/noctalia-dev/noctalia/releases"
 distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version/.beta/-beta.}.tar.gz"
-checksum=95173862a62ff36923212e9de6d58f789841acf147fea99d351fdbfae6a60eda
+checksum=6386f9b56bf01e6515a3df9e4662a80a8e20ec87815cdca362af9b9c3c429be2
 
 CXXFLAGS="-std=c++23"
 
