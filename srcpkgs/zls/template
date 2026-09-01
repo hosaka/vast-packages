@@ -1,0 +1,20 @@
+# Template file for 'zls'
+pkgname=zls
+version=0.16.0
+revision=1
+build_style=zig-build
+short_desc="Zig language server"
+maintainer="Orphaned <orphan@voidlinux.org>"
+license="MIT"
+homepage="https://github.com/zigtools/zls"
+distfiles="https://github.com/zigtools/zls/archive/refs/tags/${version}.tar.gz"
+checksum=e7c5936f5b3a057ce851be0876e4e259b5c4d02f9aae038cd24a5d6b586b029f
+
+case "${XBPS_TARGET_MACHINE}" in
+	armv[67]*) nopie=yes ;;
+	*) configure_args+=" -Dpie" ;;
+esac
+
+post_install() {
+	vlicense LICENSE
+}
