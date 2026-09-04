@@ -1,6 +1,6 @@
 # Template file for 'noctalia'
 pkgname=noctalia
-version=5.0.0.beta10
+version=5.0.1
 revision=1
 build_style=meson
 build_helper=qemu
@@ -15,23 +15,22 @@ makedepends="MesaLib-devel basu-devel cairo-devel fontconfig-devel freetype-deve
 short_desc="Desktop shell built on Wayland and OpenGL ES"
 maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
-homepage="https://github.com/noctalia-dev/noctalia"
+homepage="https://docs.noctalia.dev/noctalia/"
 changelog="https://github.com/noctalia-dev/noctalia/releases"
-distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version/.beta/-beta.}.tar.gz"
-checksum=6386f9b56bf01e6515a3df9e4662a80a8e20ec87815cdca362af9b9c3c429be2
+distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version}.tar.gz"
+checksum=ed8334f294e9f94f4744e315b674511fc51203a6a56c561af8803a6eb6884698
 
 CXXFLAGS="-std=c++23"
 
-do_patch() {
-	local upver="${version/beta/-beta.}"
-	vsed -i "0,/version: '[^']*'/s//version: '${upver}'/" meson.build
-}
-
 post_install() {
+	vlicense LICENSE
+	vsconf example.toml
+
+	vmkdir usr/share/doc/${pkgname}
+	vcopy "docs/user/*" usr/share/doc/${pkgname}
+
 	for shell in bash fish zsh; do
 		vtargetrun ${DESTDIR}/usr/bin/noctalia completions ${shell} > noctalia.${shell}
 		vcompletion noctalia.${shell} ${shell}
 	done
-
-	vlicense LICENSE
 }
