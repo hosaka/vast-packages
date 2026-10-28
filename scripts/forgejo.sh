@@ -2,7 +2,7 @@
 # Forgejo generic package registry access
 # Requires: jq, curl and XBPS_UPLOAD_TOKEN env var
 
-set -e
+set -eo pipefail
 
 FORGEJO_URL="${FORGEJO_URL:-https://code.hosaka.cc}"
 FORGEJO_REPOSITORY_OWNER="${FORGEJO_REPOSITORY_OWNER:-hosaka}"

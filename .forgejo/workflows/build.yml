@@ -122,22 +122,44 @@ jobs:
       - name: Build packages
         if: steps.changed.outputs.packages != ''
         run: |
+          # -1 fails instead of building missing dependencies from source, this happens
+          # when the mirror has not caught up with void-packages repo, re-run once it syncs
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder void-packages/xbps-src -E -s pkg $pkg
+            sudo -Eu builder void-packages/xbps-src -1 -E -s pkg $pkg
           done
 
       - name: Sign and index packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
         run: |
           cd void-packages/hostdir/binpkgs
+
+          # drop packages that are not ours, xbps-src builds dependencies from source
+          # when the mirror has not caught up with void-packages git yet
+          for pkg in *.xbps; do
+            pkgname=$(xbps-uhelper getpkgname "$(xbps-uhelper binpkgver "$pkg")")
+            if [ ! -e "$FORGEJO_WORKSPACE/srcpkgs/$pkgname" ]; then
+              echo "Skipping $pkg (not in vast-packages)"
+              rm "$pkg"
+            fi
+          done
+
           echo "${{ secrets.XBPS_PRIVATE_KEY }}" > /tmp/private.pem
 
           # sign newly built packages
           xbps-rindex --privkey /tmp/private.pem --signedby "Alex March" --sign-pkg *.xbps
 
-          # download existing repodata that contains all previously registered packages
-          $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata || echo "No existing repodata"
+          # replace local repodata with the existing one that contains all previously registered
+          # packages, it may only be missing while the registry is still empty (first run)
+          rm -f x86_64-repodata
+          if ! $FORGEJO_WORKSPACE/scripts/forgejo.sh download x86_64-repodata; then
+            packages=$($FORGEJO_WORKSPACE/scripts/forgejo.sh list)
+            if [ -n "$packages" ]; then
+              echo "Failed to download repodata of a non-empty registry" >&2
+              exit 1
+            fi
+            echo "No existing repodata"
+          fi
 
           # add newly built packages to the index (updates existing entries if version is greater)
           xbps-rindex --add *.xbps
@@ -151,7 +173,7 @@ jobs:
         run: |
           packages=$(scripts/forgejo.sh list)
           for pkg in ${{ steps.changed.outputs.deleted }}; do
-            for match in $(echo "$packages" | grep "^${pkg}-"); do
+            for match in $(echo "$packages" | grep "^${pkg}-[^-]*_[0-9]*\."); do
               scripts/forgejo.sh delete "$match"
             done
           done
@@ -161,9 +183,10 @@ jobs:
         run: |
           packages=$(scripts/forgejo.sh list)
 
-          for pkg in ${{ steps.changed.outputs.packages }}; do
-            pkgname=$(xbps-query --repository void-packages/hostdir/binpkgs --property pkgname $pkg) || continue
-            for match in $(echo "$packages" | grep "^${pkgname}-"); do
+          # iterate over built packages so subpackages are covered too
+          for pkg in void-packages/hostdir/binpkgs/*.xbps; do
+            pkgname=$(xbps-uhelper getpkgname "$(xbps-uhelper binpkgver "$pkg")")
+            for match in $(echo "$packages" | grep "^${pkgname}-[^-]*_[0-9]*\."); do
               scripts/forgejo.sh delete "$match"
             done
           done
