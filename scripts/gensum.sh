@@ -2,7 +2,7 @@
 # gensum.sh [-i] <template|pkgdir> - update SHA256 checksums in a template
 # Does not require xbps-src or void-packages, just curl and sha256sum
 
-set -e
+set -eo pipefail
 
 usage() {
   echo "Usage: $(basename "$0") [-i] <template|pkgdir>" >&2
@@ -34,6 +34,14 @@ else
   echo "gensum: could not find template: $arg" >&2
   exit 1
 fi
+
+# Stub xbps-src option helpers, they can't affect distfiles or checksum
+vopt_if() { :; }
+vopt_with() { :; }
+vopt_enable() { :; }
+vopt_conflict() { :; }
+vopt_bool() { :; }
+vopt_feature() { :; }
 
 # Source the template to expand all variables (version, pkgname, etc.)
 . "$template"
