@@ -1,25 +1,25 @@
 # Template file for 'noctalia'
 pkgname=noctalia
 version=5.4.1
-revision=1
+revision=2
 build_style=meson
 build_helper=qemu
-hostmakedepends="pkg-config"
-makedepends="MesaLib-devel basu-devel cairo-devel fontconfig-devel freetype-devel
- harfbuzz-devel jemalloc-devel json-c++ libcurl-devel libepoxy-devel libglvnd-devel
+hostmakedepends="pkg-config mold"
+makedepends="cairo-devel fontconfig-devel freetype-devel harfbuzz-devel
+ jemalloc-devel json-c++ libcurl-devel libglib-devel libglvnd-devel
  libical-devel libjxl-devel libmd4c-devel libqalculate-devel librsvg-devel
  libsecret-devel libsndfile-devel libsodium-devel libwebp-devel libxkbcommon-devel
  libxml2-devel pam-devel pango-devel pipewire-devel polkit-devel sdbus-c++-devel stb
  tomlplusplus-devel wayland-devel wayland-protocols wireplumber-devel"
-depends="git sound-theme-freedesktop
+depends="git sound-theme-freedesktop virtual?font:sans-serif
  $(vopt_if libheif libheif) $(vopt_if ddcutil ddcutil)
  $(vopt_if upower upower) $(vopt_if power_profiles power-profiles-daemon)"
-checkdepends="git dejavu-fonts-ttf"
+checkdepends="git dbus openssl python3 dejavu-fonts-ttf"
 short_desc="Desktop shell built on Wayland and OpenGL ES"
 maintainer="Alex March <alex@hosaka.cc>"
-license="MIT"
+license="MIT, Apache-2.0"
 homepage="https://docs.noctalia.dev/noctalia/"
-changelog="https://github.com/noctalia-dev/noctalia/releases"
+changelog="https://noctalia.dev/changelogs/v${version}"
 distfiles="https://github.com/noctalia-dev/noctalia/archive/refs/tags/v${version}.tar.gz"
 checksum=6069d922e9d72488c74e4ce335314ce2203f08bd4641380bfe1bd137004597fa
 
@@ -30,16 +30,38 @@ desc_option_libheif="Enable support for HEIC, HEIF, and AVIF image decoding"
 desc_option_ddcutil="Enable support for external monitor brightness control"
 desc_option_power_profiles="Enable support for power profile switching"
 
+CXXFLAGS="-std=c++23"
+LDFLAGS="-fuse-ld=mold"
+
 if [ "$XBPS_CHECK_PKGS" ]; then
 	configure_args="-Dtests=enabled"
 else
 	configure_args="-Dtests=disabled"
 fi
 
-CXXFLAGS="-std=c++23"
+# jemalloc is only used on glibc
+case "$XBPS_TARGET_LIBC" in
+	glibc)
+		makedepends+=" jemalloc-devel"
+		configure_args+=" -Djemalloc=enabled"
+		;;
+	*)
+		configure_args+=" -Djemalloc=disabled"
+		;;
+esac
+
+pre_configure() {
+	vsed -i src/core/git_revision.h.in -e "s/@VCS_TAG@/${version}_${revision}/g"
+}
 
 post_install() {
 	vlicense LICENSE
+	vlicense third_party/fzy/LICENSE fzy-LICENSE
+	vlicense third_party/luau/LICENSE.txt luau-LICENSE
+	vlicense third_party/luau/lua_LICENSE.txt lua-LICENSE
+	vlicense third_party/material_color_utilities/LICENSE material-color-utilities-LICENSE
+	vlicense third_party/wuffs/LICENSE-MIT wuffs-LICENSE-MIT
+	vlicense third_party/wuffs/LICENSE-APACHE wuffs-LICENSE-APACHE
 	vsconf example.toml
 
 	vmkdir usr/share/doc/${pkgname}
