@@ -1,0 +1,48 @@
+# Template file for 'makemkv'
+pkgname=makemkv
+version=2.0.0
+revision=1
+archs="x86_64 i686 aarch64 armv7l"
+create_wrksrc=yes
+build_wrksrc="makemkv-oss-${version}"
+build_style=gnu-configure
+# only disables upstream's own stripping, so xbps-src does it instead
+configure_args="--enable-debug"
+hostmakedepends="pkg-config qt5-host-tools"
+makedepends="ffmpeg6-devel openssl-devel expat-devel zlib-devel qt5-devel"
+short_desc="DVD and Blu-ray to MKV converter"
+maintainer="Alex March <alex@hosaka.cc>"
+license="custom:MakeMKV, LGPL-2.1-or-later, GPL-2.0-or-later"
+homepage="https://www.makemkv.com/"
+changelog="https://www.makemkv.com/download/history.html"
+distfiles="https://www.makemkv.com/download/makemkv-oss-${version}.tar.gz
+ https://www.makemkv.com/download/makemkv-bin-${version}.tar.gz"
+checksum="435316b2d219eb48c880526557addd076b5f5e6de5171424c7651f9cac95b161
+ f1265e74875a186efdfbbbec7459a64e969033515e53cbc4d805f0a374f0a124"
+repository=nonfree
+# the EULA allows repackaging only with program files unchanged
+restricted=yes
+nostrip_files="makemkvcon"
+
+case "$XBPS_TARGET_MACHINE" in
+	x86_64) _binarch=amd64 ;;
+	i686) _binarch=i386 ;;
+	aarch64) _binarch=arm64 ;;
+	armv7l) _binarch=armhf ;;
+esac
+
+post_install() {
+	# install the closed-source engine via upstream's makefile, ARCH is passed
+	# explicitly instead of uname -m, and eula_accepted skips the interactive prompt
+	cd ${wrksrc}/makemkv-bin-${version}
+	mkdir -p tmp
+	echo accepted > tmp/eula_accepted
+	make install DESTDIR=${DESTDIR} PREFIX=/usr ARCH=${_binarch} ARCH_OK=1
+
+	# drives are accessed through SCSI generic devices (/dev/sg*)
+	# vmkdir usr/lib/modules-load.d
+	# echo sg > ${DESTDIR}/usr/lib/modules-load.d/makemkv.conf
+
+	# EULA with the LGPL and GPL texts appended
+	vlicense ${wrksrc}/${build_wrksrc}/License.txt
+}
