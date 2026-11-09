@@ -55,9 +55,20 @@ jobs:
       - name: Find changed packages
         id: changed
         run: |
+          # restricted packages must not be redistributed, never build or publish them
+          drop_restricted() {
+            while read -r pkg; do
+              if grep -q '^restricted=yes' "srcpkgs/$pkg/template"; then
+                echo "Skipping restricted package $pkg" >&2
+              else
+                echo "$pkg"
+              fi
+            done
+          }
+
           if [ "${{ forgejo.event_name }}" = "workflow_dispatch" ]; then
             # manual trigger builds everything
-            echo "packages=$(ls srcpkgs/ | tr '\n' ' ')" >> $FORGEJO_OUTPUT
+            echo "packages=$(ls srcpkgs/ | drop_restricted | tr '\n' ' ')" >> $FORGEJO_OUTPUT
             echo "deleted=" >> $FORGEJO_OUTPUT
             echo "Building all packages"
           else
@@ -71,6 +82,7 @@ jobs:
             packages=$(git diff-tree -r --no-renames --name-only --diff-filter=AM \
               "$base" "${{ forgejo.sha }}" -- 'srcpkgs/*/template' \
               | cut -d/ -f2 \
+              | drop_restricted \
               | xargs --no-run-if-empty sudo -Eu builder ./void-packages/xbps-src sort-dependencies \
               | tr '\n' ' ')
             echo "packages=$packages" >> $FORGEJO_OUTPUT
