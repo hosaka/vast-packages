@@ -1,0 +1,50 @@
+# Template file for 'sonora'
+pkgname=sonora
+version=0.48.1
+revision=1
+build_style=cargo
+build_helper="qemu"
+make_install_args="--path crates/sonora"
+hostmakedepends="pkg-config cmake"
+makedepends="alsa-lib-devel dbus-devel fontconfig-devel freetype-devel
+ libxcb-devel libxkbcommon-devel sqlite-devel wayland-devel"
+# dlopened at runtime: wgpu (vulkan, EGL fallback) and gpui's wayland backend
+depends="vulkan-loader libglvnd wayland"
+short_desc="Native music streaming client for Spotify, Subsonic and more"
+maintainer="Alex March <alex@hosaka.cc>"
+license="GPL-3.0-or-later, OFL-1.1, MIT, ISC, Apache-2.0, CC-BY-4.0"
+homepage="https://github.com/sonorahq/sonora"
+changelog="https://github.com/sonorahq/sonora/releases"
+distfiles="https://github.com/sonorahq/sonora/archive/refs/tags/v${version}.tar.gz"
+checksum=62d400f3f46450587f6505288c3a2a8a5fc1306d921eb35f7f9e5980fc05cf5e
+
+post_patch() {
+	# only forces the mold linker for x86_64, plus dev aliases
+	rm .cargo/config.toml
+}
+
+post_install() {
+	vinstall assets/linux/sonora.desktop 644 usr/share/applications
+	vinstall assets/linux/sonora.svg 644 usr/share/icons/hicolor/scalable/apps
+
+	local icon size
+	for icon in assets/linux/icons/hicolor/*/apps/sonora.png; do
+		size=${icon#assets/linux/icons/hicolor/}
+		size=${size%%/*}
+		vinstall ${icon} 644 usr/share/icons/hicolor/${size}/apps
+	done
+
+	for shell in bash fish zsh; do
+		vtargetrun ${DESTDIR}/usr/bin/sonora completions ${shell} > sonora.${shell}
+		vcompletion sonora.${shell} ${shell}
+	done
+
+	vlicense THIRD-PARTY.md
+	vlicense assets/fonts/LICENSE.txt LICENSE.Inter
+	vlicense assets/icons/LICENSE LICENSE.icons
+	local pack
+	for pack in assets/icons/*/LICENSE; do
+		pack=${pack%/LICENSE}
+		vlicense ${pack}/LICENSE LICENSE.icons.${pack##*/}
+	done
+}
