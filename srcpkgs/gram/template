@@ -1,6 +1,6 @@
 # Template file for 'gram'
 pkgname=gram
-version=3.2.0
+version=3.5.2
 revision=1
 build_style=cargo
 make_build_args="--package cli --package gram"
@@ -9,12 +9,12 @@ makedepends="alsa-lib-devel fontconfig-devel libxcb-devel libxkbcommon-devel
  libzstd-devel wayland-devel vulkan-loader openssl-devel sqlite-devel
  libgit2-1.9-devel libX11-devel"
 depends="git"
-short_desc="Gram Code Editor"
+short_desc="Gram source code editor and an IDE"
 maintainer="Alex March <alex@hosaka.cc>"
-license="GPL-3.0-or-later OR Apache-2.0 OR AGPL-3.0-or-later"
+license="GPL-3.0-or-later"
 homepage="https://gram.liten.app/"
 distfiles="https://codeberg.org/GramEditor/gram/archive/${version}.tar.gz"
-checksum=ff455814b3ba5909a1ae359bd5716874bd072495fdaa55fafbc025ed060f1989
+checksum=ba51b234cc2e947c68881675028fac9649216f601d205dd3b56083388a48697d
 
 export LIBGIT2_NO_VENDOR=1
 export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
@@ -37,7 +37,4 @@ post_install() {
 	vinstall crates/gram/resources/gram.desktop 644 usr/share/applications/
 	vinstall crates/gram/resources/app-icon.png 644 usr/share/icons/hicolor/512x512/apps/ gram.png
 	vinstall crates/gram/resources/app-icon@2x.png 644 usr/share/icons/hicolor/1024x1024/apps/ gram.png
-
-	vlicense LICENSE-APACHE
-	vlicense LICENSE-GPL
 }
