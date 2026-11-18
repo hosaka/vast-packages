@@ -1,0 +1,23 @@
+name: Auto assign Issue/PR
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  assign:
+    runs-on: linux-amd64
+    container:
+      image: alpine:3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
+
+    steps:
+      - name: Assign to to myself
+        run: |
+          apk add --no-cache curl
+          curl --fail --silent --show-error --request PATCH \
+            --header "Authorization: token ${{ forgejo.token }}" \
+            --header "Content-Type: application/json" \
+            --data '{"assignees": ["hosaka"]}' \
+            "${{ forgejo.server_url }}/api/v1/repos/${{ forgejo.repository }}/issues/${{ forgejo.event.issue.number || forgejo.event.pull_request.number }}"
