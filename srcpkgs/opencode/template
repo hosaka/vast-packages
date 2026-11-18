@@ -1,6 +1,6 @@
 # Template file for 'opencode'
 pkgname=opencode
-version=1.18.21
+version=1.19.6
 revision=1
 hostmakedepends="nodejs python3"
 short_desc="Open source coding agent"
@@ -8,7 +8,7 @@ maintainer="Alex March <alex@hosaka.cc>"
 license="MIT"
 homepage="https://opencode.ai"
 distfiles="https://github.com/anomalyco/opencode/archive/refs/tags/v${version}.tar.gz"
-checksum=387ad0d4ef4364c00100fafaf90f80cff6858d7055bddd920aeacbab9b34a49d
+checksum=0dfc7c58a82a1f9ca635ebcfe8aad594009edb22a5ef752719d2b89fbe5918b8
 nostrip=yes
 
 build_options="nowebui"
@@ -18,7 +18,8 @@ desc_option_nowebui="Build without embedded Web UI"
 export OPENCODE_VERSION=${version}
 
 do_build() {
-	npm install -g bun
+	# use the bun release upstream pins, a newer one may not accept its lockfile and patches
+	npm install -g --allow-scripts=bun "$(node -p 'require("./package.json").packageManager')"
 	bun install --frozen-lockfile --cpu=x64 --os=linux
 	packages/opencode/script/build.ts --single $(vopt_if nowebui --skip-embed-web-ui)
 }
