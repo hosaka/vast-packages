@@ -1,11 +1,11 @@
 # Template file for 'sonora'
 pkgname=sonora
-version=0.48.1
+version=0.50.1
 revision=1
 build_style=cargo
 build_helper="qemu"
 make_install_args="--path crates/sonora"
-hostmakedepends="pkg-config cmake"
+hostmakedepends="pkg-config cmake mold"
 makedepends="alsa-lib-devel dbus-devel fontconfig-devel freetype-devel
  libxcb-devel libxkbcommon-devel sqlite-devel wayland-devel"
 # dlopened at runtime: wgpu (vulkan, EGL fallback) and gpui's wayland backend
@@ -16,12 +16,9 @@ license="GPL-3.0-or-later, OFL-1.1, MIT, ISC, Apache-2.0, CC-BY-4.0"
 homepage="https://github.com/sonorahq/sonora"
 changelog="https://github.com/sonorahq/sonora/releases"
 distfiles="https://github.com/sonorahq/sonora/archive/refs/tags/v${version}.tar.gz"
-checksum=62d400f3f46450587f6505288c3a2a8a5fc1306d921eb35f7f9e5980fc05cf5e
+checksum=43a5e36942b32d88e8e712ef2829d9e5db3a89a85fa32b2d9378f506c50c675e
 
-post_patch() {
-	# only forces the mold linker for x86_64, plus dev aliases
-	rm .cargo/config.toml
-}
+export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
 
 post_install() {
 	vinstall assets/linux/sonora.desktop 644 usr/share/applications
@@ -40,7 +37,7 @@ post_install() {
 	done
 
 	vlicense THIRD-PARTY.md
-	vlicense assets/fonts/LICENSE.txt LICENSE.Inter
+	vlicense assets/fonts/LICENSE.txt LICENSE.fonts
 	vlicense assets/icons/LICENSE LICENSE.icons
 	local pack
 	for pack in assets/icons/*/LICENSE; do
