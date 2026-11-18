@@ -10,6 +10,11 @@ on:
     paths:
       - "srcpkgs/**"
   workflow_dispatch:
+    inputs:
+      all:
+        description: "Rebuild all packages. This WILL take ages!"
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -66,8 +71,7 @@ jobs:
             done
           }
 
-          if [ "${{ forgejo.event_name }}" = "workflow_dispatch" ]; then
-            # manual trigger builds everything
+          if [ "${{ forgejo.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.all }}" = "true" ]; then
             echo "packages=$(ls srcpkgs/ | drop_restricted | tr '\n' ' ')" >> $FORGEJO_OUTPUT
             echo "deleted=" >> $FORGEJO_OUTPUT
             echo "Building all packages"
@@ -76,7 +80,18 @@ jobs:
             if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
               base=$(git merge-base HEAD "origin/${{ forgejo.event.pull_request.base.ref }}")
             else
-              base="${{ forgejo.event.before }}"
+              # compare against the last commit this workflow published, not the previous tip
+              runs=$(curl --silent --show-error --fail \
+                "$FORGEJO_URL/api/v1/repos/$FORGEJO_REPOSITORY/actions/runs?event=push&event=workflow_dispatch&status=success&ref=${{ forgejo.ref }}&limit=50&page=1")
+              last=$(echo "$runs" | jq --raw-output \
+                '[.workflow_runs[] | select(.workflow_id == "build.yml")][0].commit_sha // empty')
+              if [ -z "$last" ]; then
+                echo "No successful run on ${{ forgejo.ref }} yet, run manually with 'all' to build every package" >&2
+                exit 1
+              fi
+              # merge-base skips templates of commits that a force-push removed from the branch
+              base=$(git merge-base "$last" "${{ forgejo.sha }}")
+              echo "Last successful run was at $last, comparing against $base"
             fi
 
             packages=$(git diff-tree -r --no-renames --name-only --diff-filter=AM \
