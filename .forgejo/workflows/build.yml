@@ -16,6 +16,12 @@ on:
         type: boolean
         default: false
 
+# publishing runs queue behind each other instead of being cancelled
+# a new push to a pull request only cancels that PR's previous run
+concurrency:
+  group: ${{ forgejo.event_name == 'pull_request' && forgejo.ref || 'publish' }}
+  cancel-in-progress: ${{ forgejo.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: linux-amd64
