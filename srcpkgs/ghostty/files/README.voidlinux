@@ -1,0 +1,22 @@
+# User Service
+
+Ghostty ships a systemd user unit, app-com.mitchellh.ghostty.service, that
+starts a windowless Ghostty owning the com.mitchellh.ghostty dbus name. The
+runit alternative is a user service managed by turnstile, installed in
+/usr/share/examples/ghostty/.
+
+To enable the service for your user:
+
+	mkdir ~/.config/service/ghostty
+	ln -s /usr/share/examples/ghostty/ghostty.run ~/.config/service/ghostty/run
+	ln -s /usr/share/examples/ghostty/ghostty.check ~/.config/service/ghostty/check
+
+$TURNSTILE_ENV_DIR needs WAYLAND_DISPLAY (or DISPLAY) and
+DBUS_SESSION_BUS_ADDRESS.
+
+## Logging
+
+Output goes to svlogtail under the turnstiled tag. To tag it as ghostty:
+
+	mkdir ~/.config/service/ghostty/log
+	ln -s /usr/bin/vlogger ~/.config/service/ghostty/log/run
