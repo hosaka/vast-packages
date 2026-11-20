@@ -144,7 +144,10 @@ jobs:
           done
 
       # a failed build should still leave its caches for the next run
+      # pull request runs save to a cache only that pull request can read, falling back to main's,
+      # the runner only keeps the newest entry per key, so a fixed key per scope replaces the last one
       - name: Restore build caches
+        id: cache
         if: steps.changed.outputs.packages != ''
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -154,8 +157,8 @@ jobs:
             void-packages/hostdir/gocache-glibc
             void-packages/hostdir/sccache
             void-packages/hostdir/zig
-          key: xbps-hostdir-${{ forgejo.run_id }}
-          restore-keys: xbps-hostdir-
+          key: ${{ forgejo.event_name == 'pull_request' && format('xbps-hostdir-pr-{0}', forgejo.event.pull_request.number) || 'xbps-hostdir-main' }}
+          restore-keys: xbps-hostdir-main
 
       - name: Prepare void-packages masterdir
         if: steps.changed.outputs.packages != ''
@@ -211,7 +214,7 @@ jobs:
             void-packages/hostdir/gocache-glibc
             void-packages/hostdir/sccache
             void-packages/hostdir/zig
-          key: xbps-hostdir-${{ forgejo.run_id }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
 
       - name: Sign and index packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
