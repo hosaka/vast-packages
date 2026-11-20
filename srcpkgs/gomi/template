@@ -1,0 +1,18 @@
+# Template file for 'gomi'
+pkgname=gomi
+version=1.10.1
+revision=1
+build_style=go
+go_import_path=github.com/babarot/gomi
+go_ldflags="-X main.version=v${version}"
+short_desc="Safer alternative to rm that moves files to the trash"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://gomi.dev"
+changelog="https://raw.githubusercontent.com/babarot/gomi/main/CHANGELOG.md"
+distfiles="https://github.com/babarot/gomi/archive/refs/tags/v${version}.tar.gz"
+checksum=f36a6f3149c1fba46a8785dccd6deb8d45a5aee180a6fc851d6fd9c4234ae1d2
+
+post_install() {
+	vlicense LICENSE
+}
