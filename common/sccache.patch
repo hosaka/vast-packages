@@ -1,0 +1,21 @@
+Cache compiled crates in vast-packages CI with sccache from the rust-sccache package.
+
+--- a/common/environment/build-style/cargo.sh
++++ b/common/environment/build-style/cargo.sh
+@@ -9,3 +9,17 @@
+ fi
+ 
+ build_helper+=" rust"
++
++# vast-packages CI: cache compiled crates, SCCACHE_BASEDIRS strips the versioned
++# wrksrc from cache keys so unchanged crates still hit after an update
++if [ "$pkgname" != rust-sccache ]; then
++	hostmakedepends+=" rust-sccache"
++	export RUSTC_WRAPPER=/usr/bin/sccache
++	export SCCACHE_DIR=/host/sccache
++	export SCCACHE_BASEDIRS="$wrksrc"
++	export SCCACHE_CACHE_SIZE=4G
++	export SCCACHE_IDLE_TIMEOUT=60
++	export SCCACHE_ERROR_LOG=/host/sccache.log
++	export SCCACHE_LOG=sccache::util=info
++fi

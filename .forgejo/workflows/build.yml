@@ -44,7 +44,7 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq xtools
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs rust-sccache xtools
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -61,18 +61,20 @@ jobs:
           git clone --depth=1 $VOID_PACKAGES_REPO
           git config --global --add safe.directory "$PWD/void-packages"
           cp -r srcpkgs/* void-packages/srcpkgs/
-          # patch upstream void-packages, e.g. zig-build for versioned zig
-          # fail instead of building with upstream files if a patch no longer applies
+
+          # patch upstream void-packages common/
           for patch in common/*.patch; do
             [ -e "$patch" ] || continue
+            # fails if a patch no longer applies until it gets fixed
             git -C void-packages apply --verbose "$PWD/$patch" || exit 1
           done
+
           chown -R builder:builder void-packages
 
       - name: Find changed packages
         id: changed
         run: |
-          # restricted packages must not be redistributed, never build or publish them
+          # restricted packages must not be redistributed
           drop_restricted() {
             while read -r pkg; do
               if grep -q '^restricted=yes' "srcpkgs/$pkg/template"; then
@@ -141,12 +143,27 @@ jobs:
             sudo -Eu builder xlint $pkg
           done
 
+      # a failed build should still leave its caches for the next run
+      - name: Restore build caches
+        if: steps.changed.outputs.packages != ''
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            void-packages/hostdir/ccache
+            void-packages/hostdir/cargo
+            void-packages/hostdir/gocache-glibc
+            void-packages/hostdir/sccache
+            void-packages/hostdir/zig
+          key: xbps-hostdir-${{ forgejo.run_id }}
+          restore-keys: xbps-hostdir-
+
       - name: Prepare void-packages masterdir
         if: steps.changed.outputs.packages != ''
         run: |
           cd void-packages
           echo XBPS_ALLOW_RESTRICTED=no >> etc/conf
           echo XBPS_BUILD_ENVIRONMENT=void-packages-ci >> etc/conf
+          echo XBPS_CCACHE=yes >> etc/conf
           echo XBPS_CHECK_PKGS=yes >> etc/conf
           echo XBPS_CHROOT_CMD=uunshare >> etc/conf
           echo XBPS_MAKEJOBS=4 >> etc/conf
@@ -156,6 +173,10 @@ jobs:
           mkdir -p etc/xbps.d/custom etc/repo-keys
           echo "repository=$XBPS_VAST_PACKAGES_REPO/current" >> etc/xbps.d/custom/99-vast-packages.conf
           cp $FORGEJO_WORKSPACE/keys/*.plist etc/repo-keys/
+          # ccache reads its config from the cache dir
+          mkdir -p hostdir/ccache
+          echo "max_size = 4G" > hostdir/ccache/ccache.conf
+          chown -R builder:builder hostdir
           sudo -Eu builder ./xbps-src binary-bootstrap
 
       - name: Build packages
@@ -165,8 +186,32 @@ jobs:
           # when the mirror has not caught up with void-packages repo, re-run once it syncs
           for pkg in ${{ steps.changed.outputs.packages }}; do
             echo "Building $pkg"
-            sudo -Eu builder void-packages/xbps-src -1 -E -s pkg $pkg
+            rc=0
+            sudo -Eu builder void-packages/xbps-src -1 -E -s pkg $pkg || rc=$?
+            # cargo builds leave an sccache server behind, stopping it prints its hit rate
+            # and the next package starts one with its own SCCACHE_BASEDIRS
+            sccache --stop-server 2>/dev/null || true
+            # show SCCACHE_ERROR_LOG when the build failed
+            if [ -s void-packages/hostdir/sccache.log ]; then
+              echo "::group::sccache log for $pkg"
+              cat void-packages/hostdir/sccache.log
+              echo "::endgroup::"
+              rm void-packages/hostdir/sccache.log
+            fi
+            [ "$rc" -eq 0 ] || exit "$rc"
           done
+
+      - name: Save build caches
+        if: "!cancelled() && steps.changed.outputs.packages != ''"
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            void-packages/hostdir/ccache
+            void-packages/hostdir/cargo
+            void-packages/hostdir/gocache-glibc
+            void-packages/hostdir/sccache
+            void-packages/hostdir/zig
+          key: xbps-hostdir-${{ forgejo.run_id }}
 
       - name: Sign and index packages
         if: steps.changed.outputs.packages != '' && forgejo.event_name != 'pull_request'
