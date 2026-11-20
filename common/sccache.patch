@@ -2,7 +2,7 @@ Cache compiled crates in vast-packages CI with sccache from the rust-sccache pac
 
 --- a/common/environment/build-style/cargo.sh
 +++ b/common/environment/build-style/cargo.sh
-@@ -9,3 +9,17 @@
+@@ -9,3 +9,16 @@
  fi
  
  build_helper+=" rust"
