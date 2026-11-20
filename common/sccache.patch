@@ -2,7 +2,7 @@ Cache compiled crates in vast-packages CI with sccache from the rust-sccache pac
 
 --- a/common/environment/build-style/cargo.sh
 +++ b/common/environment/build-style/cargo.sh
-@@ -9,3 +9,16 @@
+@@ -9,3 +9,20 @@
  fi
  
  build_helper+=" rust"
@@ -15,7 +15,11 @@ Cache compiled crates in vast-packages CI with sccache from the rust-sccache pac
 +	export SCCACHE_DIR=/host/sccache
 +	export SCCACHE_BASEDIRS="$wrksrc"
 +	export SCCACHE_CACHE_SIZE=4G
-+	export SCCACHE_IDLE_TIMEOUT=60
++	# the idle timer only restarts on new requests, so a crate compiling for longer
++	# shuts the server down mid-compile and gets compiled again without caching,
++	# the server still goes away with xbps-uunshare's PID namespace
++	export SCCACHE_IDLE_TIMEOUT=0
++	# the workflow counts the hits and misses logged for each crate
 +	export SCCACHE_ERROR_LOG=/host/sccache.log
-+	export SCCACHE_LOG=sccache::util=info
++	export SCCACHE_LOG="sccache::compiler::compiler=debug/Cache (hit|miss|read error)|Compiled in"
 +fi

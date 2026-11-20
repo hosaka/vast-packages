@@ -44,7 +44,7 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs rust-sccache xtools
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools
           # create non-root user
           useradd -G xbuilder -M builder
 
@@ -188,15 +188,15 @@ jobs:
             echo "Building $pkg"
             rc=0
             sudo -Eu builder void-packages/xbps-src -1 -E -s pkg $pkg || rc=$?
-            # cargo builds leave an sccache server behind, stopping it prints its hit rate
-            # and the next package starts one with its own SCCACHE_BASEDIRS
-            sccache --stop-server 2>/dev/null || true
-            # show SCCACHE_ERROR_LOG when the build failed
-            if [ -s void-packages/hostdir/sccache.log ]; then
+            # SCCACHE_ERROR_LOG from common/sccache.patch, the sccache server itself is gone
+            # with the build chroot, so count its log lines instead of asking it for stats
+            log=void-packages/hostdir/sccache.log
+            if [ -s "$log" ]; then
+              echo "sccache: $(grep -c 'Cache hit in' "$log") hits, $(grep -c 'Cache miss in' "$log") misses"
               echo "::group::sccache log for $pkg"
-              cat void-packages/hostdir/sccache.log
+              cat "$log"
               echo "::endgroup::"
-              rm void-packages/hostdir/sccache.log
+              rm "$log"
             fi
             [ "$rc" -eq 0 ] || exit "$rc"
           done
