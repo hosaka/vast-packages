@@ -61,6 +61,12 @@ jobs:
           git clone --depth=1 $VOID_PACKAGES_REPO
           git config --global --add safe.directory "$PWD/void-packages"
           cp -r srcpkgs/* void-packages/srcpkgs/
+          # patch upstream void-packages, e.g. zig-build for versioned zig
+          # fail instead of building with upstream files if a patch no longer applies
+          for patch in common/*.patch; do
+            [ -e "$patch" ] || continue
+            git -C void-packages apply --verbose "$PWD/$patch" || exit 1
+          done
           chown -R builder:builder void-packages
 
       - name: Find changed packages
