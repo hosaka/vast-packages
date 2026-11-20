@@ -1,0 +1,57 @@
+# Template file for 'silverbullet'
+pkgname=silverbullet
+version=2.12.1
+revision=1
+build_style=cargo
+make_build_args="-p silverbullet -p sb"
+make_check_args="--workspace"
+hostmakedepends="git nodejs"
+short_desc="Self-hosted knowledge base powered by Markdown and Lua"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://silverbullet.md"
+changelog="https://raw.githubusercontent.com/silverbulletmd/silverbullet/refs/heads/main/docs/CHANGELOG.md"
+distfiles="https://github.com/silverbulletmd/silverbullet/archive/refs/tags/${version}.tar.gz"
+checksum=d263988e8ad048bf1d1338d038e3a1bfd80c80844297186d726cafbe3f8a35e5
+
+# todo: add a runit service when necessary
+# system_accounts="_silverbullet"
+# _silverbullet_homedir="/var/lib/silverbullet"
+# make_dirs="/var/lib/silverbullet 0750 _silverbullet _silverbullet"
+
+post_extract() {
+	# only wires up linkers for upstream's release cross-builds,
+	# and would override the toolchain set up by xbps-src
+	rm .cargo/config.toml
+}
+
+pre_build() {
+	# build/version.ts derives the version from `git describe`, outside a repo it
+	# generates "<version>-unknown-<build time>", seed the same string from
+	# SOURCE_DATE_EPOCH to keep it reproducible
+	printf '{"version":"%s-unknown-%s"}\n' "${version}" \
+		"$(date -u -d "@${SOURCE_DATE_EPOCH}" +%Y-%m-%dT%H-%M-%SZ)" > version.json
+
+	# the client bundle is embedded into the server binary
+	npm ci --ignore-scripts
+	npm run build
+}
+
+pre_check() {
+	npx vitest run
+}
+
+do_install() {
+	vbin target/${RUST_TARGET}/release/silverbullet
+	vbin target/${RUST_TARGET}/release/sb
+	vlicense LICENSE.md
+	# vsv silverbullet
+}
+
+silverbullet-cli_package() {
+	short_desc+=" - command line client"
+	pkg_install() {
+		vmove usr/bin/sb
+		vlicense LICENSE.md
+	}
+}

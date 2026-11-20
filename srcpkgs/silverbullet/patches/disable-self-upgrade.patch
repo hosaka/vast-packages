@@ -1,0 +1,19 @@
+--- a/server-common/src/upgrade.rs
++++ b/server-common/src/upgrade.rs
+@@ -36,9 +36,15 @@
+     pub binary: &'static str,
+ }
+ 
++/// Self-upgrade is disabled, the binaries are managed by XBPS.
++pub fn upgrade(_spec: &UpgradeSpec, _url_prefix: &str) -> Result<(), String> {
++    Err("self-upgrade is disabled, please upgrade using XBPS".to_string())
++}
++
+ /// Download and install `spec.binary` from a release zip at `url_prefix`,
+ /// replacing the currently running executable in place.
+-pub fn upgrade(spec: &UpgradeSpec, url_prefix: &str) -> Result<(), String> {
++#[allow(dead_code)]
++fn upstream_upgrade(spec: &UpgradeSpec, url_prefix: &str) -> Result<(), String> {
+     let exec =
+         std::env::current_exe().map_err(|e| format!("failed to get executable path: {e}"))?;
+     let install_dir = exec
