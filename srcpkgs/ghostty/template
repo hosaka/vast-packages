@@ -1,9 +1,11 @@
 # Template file for 'ghostty'
 pkgname=ghostty
 version=1.4.0
-revision=1
+revision=2
 build_style=zig-build
+# dbus-daemon does not search PATH, so the service file needs an absolute path
 configure_args="
+ -Dinstalled-exe-path=/usr/bin/ghostty
  -Doptimize=ReleaseFast
  -Dpie
  -Dversion-string=${version}
@@ -37,6 +39,9 @@ export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 
 post_install() {
 	vlicense LICENSE
+	vinstall ${FILESDIR}/ghostty.run 755 usr/share/examples/ghostty
+	vinstall ${FILESDIR}/ghostty.check 755 usr/share/examples/ghostty
+	vdoc ${FILESDIR}/README.voidlinux
 
 	# libghostty-vt is always installed, the ghostty executable doesn't use it
 	rm -r ${DESTDIR}/usr/include/ghostty

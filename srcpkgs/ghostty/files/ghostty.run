@@ -1,0 +1,6 @@
+#!/bin/sh
+# runit user service for turnstile, see /usr/share/doc/ghostty/README.voidlinux
+
+[ -r ./conf ] && . ./conf
+
+exec chpst -e "$TURNSTILE_ENV_DIR" ghostty --gtk-single-instance=true --initial-window=false $OPTS 2>&1
