@@ -1,6 +1,6 @@
 # Template file for 'sonora'
 pkgname=sonora
-version=0.50.2
+version=0.50.3
 revision=1
 build_style=cargo
 build_helper="qemu"
@@ -16,7 +16,7 @@ license="GPL-3.0-or-later, OFL-1.1, MIT, ISC, Apache-2.0, CC-BY-4.0"
 homepage="https://github.com/sonorahq/sonora"
 changelog="https://github.com/sonorahq/sonora/releases"
 distfiles="https://github.com/sonorahq/sonora/archive/refs/tags/v${version}.tar.gz"
-checksum=b0cd5d5b93f475c08212ec0ff276926a4a6b105d9ce8461c03085c03bf307a75
+checksum=8e1a1af03675cacbea6e42538b87564f2493120fc56377ed2afbfde710092571
 
 export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
 
