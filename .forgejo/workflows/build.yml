@@ -44,7 +44,9 @@ jobs:
           mkdir -p /etc/xbps.d && cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
           sed -i "s|repo-default.voidlinux.org|$XBPS_MIRROR_URL|g" /etc/xbps.d/*-repository-*.conf
           # install dependencies
-          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools
+          # nodejs: running actions/*
+          # zstd: compressesing cache with zstd instead of gzip
+          xbps-install -Syu xbps && xbps-install -yu && xbps-install -y sudo bash curl git jq nodejs xtools zstd
           # create non-root user
           useradd -G xbuilder -M builder
 
