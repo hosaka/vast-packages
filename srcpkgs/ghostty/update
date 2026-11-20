@@ -1,0 +1,2 @@
+site=https://github.com/ghostty-org/ghostty/tags
+pattern='/archive/refs/tags/v\K[\d.]+(?=\.tar\.gz)'

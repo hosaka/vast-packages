@@ -1,0 +1,51 @@
+# Template file for 'ghostty'
+pkgname=ghostty
+version=1.4.0
+revision=1
+build_style=zig-build
+configure_args="
+ -Doptimize=ReleaseFast
+ -Dpie
+ -Dversion-string=${version}
+ -fsys=fontconfig
+ -fsys=freetype
+ -fsys=glslang
+ -fsys=gtk4-layer-shell
+ -fsys=harfbuzz
+ -fsys=highway
+ -fsys=libpng
+ -fsys=oniguruma
+ -fsys=spirv-cross
+ -fsys=zlib"
+hostmakedepends="pkg-config zig0.17 blueprint-compiler gettext glib-devel pandoc"
+makedepends="gtk4-devel libadwaita-devel gtk4-layer-shell-devel fontconfig-devel
+ freetype-devel harfbuzz-devel glslang-devel SPIRV-Cross-devel highway-devel
+ libpng-devel oniguruma-devel zlib-devel"
+depends="ghostty-terminfo-${version}_${revision}"
+short_desc="Fast and feature-rich terminal emulator that uses GPU acceleration"
+maintainer="Alex March <alex@hosaka.cc>"
+license="MIT"
+homepage="https://ghostty.org/"
+changelog="https://ghostty.org/docs/install/release-notes/${version//./-}"
+distfiles="https://release.files.ghostty.org/${version}/ghostty-${version}.tar.gz"
+checksum=cb188ac6c3a8278d5fd7bfef15d8c017104c87f638b5560eb38024a71ae0f005
+
+# translate-c only searches the system include dirs for a native target, but
+# the zig-build style always passes -Dtarget: keep -I/usr/include from pkg-config
+# https://codeberg.org/ziglang/translate-c/issues/460
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+
+post_install() {
+	vlicense LICENSE
+
+	# libghostty-vt is always installed, the ghostty executable doesn't use it
+	rm -r ${DESTDIR}/usr/include/ghostty
+	rm ${DESTDIR}/usr/lib/libghostty-vt.* ${DESTDIR}/usr/share/pkgconfig/libghostty-vt*.pc
+}
+
+ghostty-terminfo_package() {
+	short_desc+=" - terminfo data"
+	pkg_install() {
+		vmove usr/share/terminfo
+	}
+}
