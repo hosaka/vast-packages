@@ -1,10 +1,12 @@
 # Template file for 'silverbullet'
 pkgname=silverbullet
-version=2.12.1
+version=3.0.1
 revision=1
 build_style=cargo
 make_build_args="-p silverbullet -p sb"
-make_check_args="--workspace"
+# an_extra_tool_cannot_reuse_a_built_in_name expects a debug_assert! to panic,
+# which is compiled out with --release
+make_check_args="--workspace -- --skip an_extra_tool_cannot_reuse_a_built_in_name"
 hostmakedepends="git nodejs"
 short_desc="Self-hosted knowledge base powered by Markdown and Lua"
 maintainer="Alex March <alex@hosaka.cc>"
@@ -12,7 +14,7 @@ license="MIT"
 homepage="https://silverbullet.md"
 changelog="https://raw.githubusercontent.com/silverbulletmd/silverbullet/refs/heads/main/docs/CHANGELOG.md"
 distfiles="https://github.com/silverbulletmd/silverbullet/archive/refs/tags/${version}.tar.gz"
-checksum=d263988e8ad048bf1d1338d038e3a1bfd80c80844297186d726cafbe3f8a35e5
+checksum=ed571f44d042fe860dba5ef1f1774d6b1ad481aebc55ca4b25e536901915586e
 
 # todo: add a runit service when necessary
 # system_accounts="_silverbullet"
